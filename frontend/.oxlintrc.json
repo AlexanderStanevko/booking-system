@@ -1,0 +1,6 @@
+{
+  "plugins": ["typescript", "react", "jsx-a11y", "import", "oxc"],
+  "categories": {
+    "correctness": "error"
+  }
+}
