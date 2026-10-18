@@ -1,13 +1,36 @@
+
 # Meeting Room Reservation System
 
-Minimal frontend and API scaffold for a meeting room reservation system.
+A web application for booking and managing office meeting rooms.
 
-Stack: React, TypeScript, Vite, React Router, Material UI, TanStack Query, native
-Fetch, Oxlint, Prettier, ASP.NET Core, and EF Core InMemory.
+## Project Structure
 
-Prerequisites: Node.js 22.12+, npm 10+, and the .NET 10 SDK on `PATH`.
+- `frontend/` — React application
+- `backend/` — ASP.NET Core API
 
-Start the frontend:
+## Tech Stack
+
+**Frontend**
+- React
+- TypeScript
+- Vite
+- Material UI
+- React Router
+- TanStack Query
+
+**Backend**
+- ASP.NET Core (.NET 10)
+- Entity Framework Core InMemory
+
+## Requirements
+
+- Node.js 24 LTS
+- npm
+- .NET 10 SDK
+
+## Getting Started
+
+### Frontend
 
 ```bash
 cd frontend
@@ -15,7 +38,9 @@ npm install
 npm run dev
 ```
 
-Start the backend in a separate terminal:
+### Backend
+
+Open a separate terminal:
 
 ```bash
 cd backend
@@ -23,8 +48,7 @@ dotnet restore
 dotnet run
 ```
 
-Open http://localhost:5173 and click **Check backend connection**. The response
-should be `{"status":"running"}` from http://localhost:5000/api/health.
+## Local Development
 
-To change the API URL, copy `frontend/.env.example` to `frontend/.env` and update
-`VITE_API_URL`.
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5000
