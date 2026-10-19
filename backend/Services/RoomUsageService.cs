@@ -28,7 +28,7 @@ public sealed class RoomUsageService(
         var bookedHours = reservations.Where(reservation => reservation.Status != ReservationStatus.Cancelled)
             .Sum(reservation => TimeInterval.HoursWithin(reservation.StartTime, reservation.EndTime, filter.From, filter.To));
         var completed = reservations.Where(reservation => reservation.Status == ReservationStatus.Completed).ToList();
-        var confirmedHours = completed.Where(reservation => reservation.ActualEndTime.HasValue)
+        var recordedUsageHours = completed.Where(reservation => reservation.ActualEndTime.HasValue)
             .Sum(reservation => TimeInterval.HoursWithin(reservation.StartTime,
                 reservation.ActualEndTime!.Value, filter.From, filter.To));
         var estimatedHours = completed.Where(reservation => !reservation.ActualEndTime.HasValue)
@@ -36,6 +36,6 @@ public sealed class RoomUsageService(
 
         return new RoomUsageResponse(room.Id, room.Name, reservations.Count,
             reservations.Count(reservation => reservation.Status == ReservationStatus.Cancelled), completed.Count,
-            bookedHours, confirmedHours, estimatedHours, bookedHours > 0 ? confirmedHours / bookedHours * 100 : 0);
+            bookedHours, recordedUsageHours, estimatedHours, bookedHours > 0 ? recordedUsageHours / bookedHours * 100 : 0);
     }
 }

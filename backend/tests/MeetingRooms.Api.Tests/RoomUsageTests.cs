@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MeetingRooms.Api.Common.Errors;
 using MeetingRooms.Api.Models;
 
@@ -6,7 +7,7 @@ namespace MeetingRooms.Api.Tests;
 public sealed class RoomUsageTests
 {
     [Fact]
-    public async Task Report_distinguishes_booked_confirmed_and_estimated_hours()
+    public async Task Report_distinguishes_booked_recorded_and_estimated_hours()
     {
         await using var context = new BookingTestContext();
         await AddReportDataAsync(context);
@@ -15,9 +16,12 @@ public sealed class RoomUsageTests
         Assert.Equal(1, report.CancelledReservations);
         Assert.Equal(2, report.CompletedReservations);
         Assert.Equal(6, report.TotalBookedHours);
-        Assert.Equal(1, report.ConfirmedUsedHours);
+        Assert.Equal(1, report.RecordedUsageHours);
         Assert.Equal(2, report.EstimatedUsedHours);
-        Assert.Equal(100d / 6, report.ConfirmedUsageRate, 8);
+        Assert.Equal(100d / 6, report.RecordedUsageRate, 8);
+        var json = JsonSerializer.SerializeToElement(report, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        Assert.Equal(report.RecordedUsageHours, json.GetProperty("recordedUsageHours").GetDouble());
+        Assert.Equal(report.RecordedUsageRate, json.GetProperty("recordedUsageRate").GetDouble());
     }
 
     [Fact]
@@ -30,13 +34,13 @@ public sealed class RoomUsageTests
             .Single(room => room.RoomId == context.FirstRoom.Id);
         Assert.Equal(4, report.TotalReservations);
         Assert.Equal(4, report.TotalBookedHours);
-        Assert.Equal(1, report.ConfirmedUsedHours);
+        Assert.Equal(1, report.RecordedUsageHours);
         Assert.Equal(1, report.EstimatedUsedHours);
-        Assert.Equal(25, report.ConfirmedUsageRate);
+        Assert.Equal(25, report.RecordedUsageRate);
     }
 
     [Fact]
-    public async Task Unused_scheduled_remainder_has_no_confirmed_hours()
+    public async Task Unused_scheduled_remainder_has_no_recorded_usage_hours()
     {
         await using var context = new BookingTestContext();
         await AddReportDataAsync(context);
@@ -45,9 +49,9 @@ public sealed class RoomUsageTests
             .Single(room => room.RoomId == context.FirstRoom.Id);
         Assert.Equal(1, report.TotalReservations);
         Assert.Equal(0.5, report.TotalBookedHours);
-        Assert.Equal(0, report.ConfirmedUsedHours);
+        Assert.Equal(0, report.RecordedUsageHours);
         Assert.Equal(0, report.EstimatedUsedHours);
-        Assert.Equal(0, report.ConfirmedUsageRate);
+        Assert.Equal(0, report.RecordedUsageRate);
     }
 
     [Fact]
@@ -60,7 +64,7 @@ public sealed class RoomUsageTests
         {
             Assert.Equal(0, report.TotalReservations);
             Assert.Equal(0, report.TotalBookedHours);
-            Assert.Equal(0, report.ConfirmedUsageRate);
+            Assert.Equal(0, report.RecordedUsageRate);
         });
     }
 

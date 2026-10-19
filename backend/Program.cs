@@ -21,10 +21,15 @@ var app = builder.Build();
 app.UseExceptionHandler();
 app.UseStatusCodePages(async context =>
 {
-    var notFound = context.HttpContext.Response.StatusCode == StatusCodes.Status404NotFound;
-    await context.HttpContext.Response.WriteAsJsonAsync(new ApiErrorResponse(
-        notFound ? ErrorCodes.EndpointNotFound : ErrorCodes.InvalidRequest,
-        notFound ? "The requested endpoint does not exist." : "The request could not be processed."));
+    var response = context.HttpContext.Response.StatusCode switch
+    {
+        StatusCodes.Status404NotFound => new ApiErrorResponse(
+            ErrorCodes.EndpointNotFound, "The requested endpoint does not exist."),
+        StatusCodes.Status405MethodNotAllowed => new ApiErrorResponse(
+            ErrorCodes.MethodNotAllowed, "This HTTP method is not supported by the requested endpoint."),
+        _ => new ApiErrorResponse(ErrorCodes.InvalidRequest, "The request could not be processed.")
+    };
+    await context.HttpContext.Response.WriteAsJsonAsync(response);
 });
 
 if (app.Environment.IsDevelopment())

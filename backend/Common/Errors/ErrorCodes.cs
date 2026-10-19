@@ -17,5 +17,6 @@ public static class ErrorCodes
     public const string ReservationNotFound = "RESERVATION_NOT_FOUND";
     public const string InvalidReservationStatus = "INVALID_RESERVATION_STATUS";
     public const string EndpointNotFound = "ENDPOINT_NOT_FOUND";
+    public const string MethodNotAllowed = "METHOD_NOT_ALLOWED";
     public const string UnexpectedError = "UNEXPECTED_ERROR";
 }
