@@ -37,7 +37,6 @@ if (app.Environment.IsDevelopment())
     app.UseCors("Frontend");
 }
 
-app.MapGet("/api/health", () => Results.Ok(new { status = "running" }));
 app.MapControllers();
 
 await using (var scope = app.Services.CreateAsyncScope())

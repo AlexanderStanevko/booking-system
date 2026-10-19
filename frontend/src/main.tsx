@@ -1,11 +1,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { CssBaseline } from '@mui/material';
+import { BrowserRouter } from 'react-router';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { queryClient } from './api/queryClient';
+import { theme } from './theme/theme';
 import App from './App';
 
-const queryClient = new QueryClient();
 const root = document.getElementById('root');
 
 if (!root) {
@@ -15,12 +16,12 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <CssBaseline />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />} />
-        </Routes>
-      </BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>,
 );

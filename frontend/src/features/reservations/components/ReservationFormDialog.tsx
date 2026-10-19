@@ -1,0 +1,104 @@
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Typography,
+} from '@mui/material';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { errorMessage } from '../../../api/client';
+import { AppIcon } from '../../../components/common/AppIcon';
+import { localTimeZone } from '../../../utils/dates';
+import type { Room } from '../../rooms/types/room';
+import type { User } from '../../users/types/user';
+import { useSaveReservation } from '../hooks/useReservationMutations';
+import type { Reservation } from '../types/reservation';
+import {
+  reservationFormDefaults,
+  reservationFormRequest,
+  reservationFormSchema,
+  type ReservationFormResult,
+  type ReservationFormValues,
+} from '../validation/reservationForm';
+import { ReservationFormFields } from './ReservationFormFields';
+
+interface Props {
+  reservation?: Reservation;
+  rooms: Room[];
+  users: User[];
+  onClose: () => void;
+  onSaved: (message: string) => void;
+}
+
+export function ReservationFormDialog({ reservation, rooms, users, onClose, onSaved }: Props) {
+  const mutation = useSaveReservation();
+  const form = useForm<ReservationFormValues, undefined, ReservationFormResult>({
+    resolver: zodResolver(reservationFormSchema),
+    defaultValues: reservationFormDefaults(reservation),
+  });
+  const submit = form.handleSubmit((values) =>
+    mutation.mutate(
+      {
+        id: reservation?.id,
+        values: reservationFormRequest(values, reservation),
+      },
+      { onSuccess: () => onSaved(reservation ? 'Reservation updated.' : 'Reservation created.') },
+    ),
+  );
+  return (
+    <Dialog
+      open
+      fullWidth
+      maxWidth="sm"
+      onClose={mutation.isPending ? undefined : onClose}
+      aria-labelledby="reservation-form-title"
+    >
+      <DialogTitle id="reservation-form-title" sx={{ pr: 7 }}>
+        {reservation ? 'Edit reservation' : 'New reservation'}
+        <IconButton
+          aria-label="Close reservation form"
+          onClick={onClose}
+          disabled={mutation.isPending}
+          sx={{ position: 'absolute', right: 2, top: 2 }}
+        >
+          <AppIcon name="close" />
+        </IconButton>
+      </DialogTitle>
+      <Box component="form" onSubmit={submit} noValidate>
+        <DialogContent sx={{ pt: 1 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Choose a room and add your meeting details.
+          </Typography>
+          {mutation.error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errorMessage(mutation.error)}
+            </Alert>
+          )}
+          <Box
+            component="fieldset"
+            disabled={mutation.isPending}
+            sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}
+          >
+            <ReservationFormFields control={form.control} rooms={rooms} users={users} />
+          </Box>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2.5 }}>
+            Local timezone: {localTimeZone.replaceAll('_', ' ')}.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button color="inherit" onClick={onClose} disabled={mutation.isPending}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="contained" disabled={mutation.isPending}>
+            {mutation.isPending ? 'Saving…' : 'Save reservation'}
+          </Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
+  );
+}
