@@ -1,8 +1,8 @@
 import { act, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { renderHook } from '../../../test/renderHook';
-import { queryKeys, queryPolicy } from '../../../api/queryClient';
+import { renderHook } from '@/test/renderHook';
+import { queryKeys, queryPolicy } from '@/api/queryClient';
 import { getReservation } from '../api/reservations';
 import { validValues } from '../validation/reservationForm.fixtures';
 import type { Reservation } from '../types/reservation';

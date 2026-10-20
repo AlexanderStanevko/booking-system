@@ -1,5 +1,5 @@
 import { skipToken, useQuery } from '@tanstack/react-query';
-import { queryKeys } from '../../../api/queryClient';
+import { queryKeys } from '@/api/queryClient';
 import { getReservation, getReservations } from '../api/reservations';
 import type { ReservationFilters } from '../types/reservation';
 

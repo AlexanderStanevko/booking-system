@@ -10,7 +10,7 @@ import {
   Typography,
   type TablePaginationProps,
 } from '@mui/material';
-import { paginationPageSizes } from '../../hooks/usePagination';
+import { paginationPageSizes } from '@/hooks/usePagination';
 
 interface Props {
   title: string;

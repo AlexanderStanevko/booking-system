@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { DateRangeFields } from '../../../components/common/DateRangeFields';
-import { FilterPanel } from '../../../components/common/FilterPanel';
-import { dateRangeError, dateRangeParameters } from '../../../utils/dates';
+import { DateRangeFields } from '@/components/common/DateRangeFields';
+import { FilterPanel } from '@/components/common/FilterPanel';
+import { dateRangeError, dateRangeParameters } from '@/utils/dates';
 import type { RoomUsageFilters } from '../types/roomUsage';
 
 const emptyRange = { from: '', to: '' };

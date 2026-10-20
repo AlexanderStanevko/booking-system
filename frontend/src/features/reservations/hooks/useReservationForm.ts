@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useClock } from '../../../hooks/useClock';
-import {
-  isValidLocalDateTime,
-  millisecondsPerMinute,
-  reservationTimestamp,
-} from '../../../utils/dates';
-import type { Room } from '../../rooms/types/room';
-import type { User } from '../../users/types/user';
+import { useClock } from '@/hooks/useClock';
+import { isValidLocalDateTime, millisecondsPerMinute, reservationTimestamp } from '@/utils/dates';
+import type { Room } from '@/features/rooms/types/room';
+import type { User } from '@/features/users/types/user';
 import type { Reservation } from '../types/reservation';
 import {
   createReservationFormSchema,

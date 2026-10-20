@@ -1,6 +1,6 @@
 import { getContrastRatio } from '@mui/material/styles';
 import { expect, it } from 'vitest';
-import { theme } from '../../theme/theme';
+import { theme } from '@/theme/theme';
 import { statusColors } from './reservationPresentation';
 import { reservationStatusSchema } from './types/reservation';
 

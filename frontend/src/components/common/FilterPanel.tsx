@@ -1,6 +1,6 @@
 import type { FormEvent, ReactNode } from 'react';
 import { Alert, Box, Button, Paper, Stack, Typography } from '@mui/material';
-import { layoutTokens } from '../../theme/theme';
+import { layoutTokens } from '@/theme/theme';
 import { AppIcon } from './AppIcon';
 
 interface Props {

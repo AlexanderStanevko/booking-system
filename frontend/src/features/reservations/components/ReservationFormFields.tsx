@@ -1,9 +1,9 @@
 import { Box, TextField } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { DateTimeInput } from '../../../components/common/DateTimeInput';
-import { millisecondsPerDay } from '../../../utils/dates';
-import type { Room } from '../../rooms/types/room';
-import type { User } from '../../users/types/user';
+import { DateTimeInput } from '@/components/common/DateTimeInput';
+import { millisecondsPerDay } from '@/utils/dates';
+import type { Room } from '@/features/rooms/types/room';
+import type { User } from '@/features/users/types/user';
 import type { ReservationForm } from '../hooks/useReservationForm';
 import type { Reservation } from '../types/reservation';
 import { RoomSelect } from './RoomSelect';

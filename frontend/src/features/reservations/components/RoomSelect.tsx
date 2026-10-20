@@ -1,6 +1,6 @@
 import { Autocomplete, Box, TextField, Typography } from '@mui/material';
 import type { Ref } from 'react';
-import { equipmentNames, type Room } from '../../rooms/types/room';
+import { equipmentNames, type Room } from '@/features/rooms/types/room';
 
 interface Props {
   rooms: Room[];

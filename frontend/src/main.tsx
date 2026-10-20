@@ -6,8 +6,8 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import 'dayjs/locale/en-gb';
-import { queryClient } from './api/queryClient';
-import { theme } from './theme/theme';
+import { queryClient } from '@/api/queryClient';
+import { theme } from '@/theme/theme';
 import App from './App';
 
 const root = document.getElementById('root');

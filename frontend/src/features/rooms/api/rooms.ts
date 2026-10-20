@@ -1,4 +1,4 @@
-import { apiRequest, queryString } from '../../../api/client';
+import { apiRequest, queryString } from '@/api/client';
 import { roomSchema, type RoomFilters } from '../types/room';
 
 export function getRooms(filters: RoomFilters, signal?: AbortSignal) {

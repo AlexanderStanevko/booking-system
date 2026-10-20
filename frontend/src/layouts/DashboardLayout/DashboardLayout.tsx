@@ -1,10 +1,10 @@
 import { Suspense, useState } from 'react';
 import { Box, Drawer, IconButton, LinearProgress, Link, Stack, Typography } from '@mui/material';
 import { Outlet } from 'react-router';
-import { Navigation } from '../../components/layout/Navigation';
-import { AppIcon } from '../../components/common/AppIcon';
-import { layoutTokens } from '../../theme/theme';
-import { localTimeZone } from '../../utils/dates';
+import { Navigation } from '@/components/layout/Navigation';
+import { AppIcon } from '@/components/common/AppIcon';
+import { layoutTokens } from '@/theme/theme';
+import { localTimeZone } from '@/utils/dates';
 import styles from './DashboardLayout.module.scss';
 
 export function DashboardLayout() {

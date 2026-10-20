@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Alert, Typography } from '@mui/material';
-import { PageHeader } from '../components/common/PageHeader';
-import { QueryState } from '../components/common/QueryState';
-import { TablePanel } from '../components/common/TablePanel';
-import { RoomUsageTable } from '../features/reports/components/RoomUsageTable';
-import { UsageFilters } from '../features/reports/components/UsageFilters';
-import { useRoomUsage } from '../features/reports/hooks/useRoomUsage';
-import type { RoomUsageFilters } from '../features/reports/types/roomUsage';
-import { usePagination } from '../hooks/usePagination';
+import { PageHeader } from '@/components/common/PageHeader';
+import { QueryState } from '@/components/common/QueryState';
+import { TablePanel } from '@/components/common/TablePanel';
+import { RoomUsageTable } from '@/features/reports/components/RoomUsageTable';
+import { UsageFilters } from '@/features/reports/components/UsageFilters';
+import { useRoomUsage } from '@/features/reports/hooks/useRoomUsage';
+import type { RoomUsageFilters } from '@/features/reports/types/roomUsage';
+import { usePagination } from '@/hooks/usePagination';
 
 export default function ReportsPage() {
   const [filters, setFilters] = useState<RoomUsageFilters>({});

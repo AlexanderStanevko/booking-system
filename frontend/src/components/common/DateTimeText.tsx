@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material';
-import { formatDate, formatTime } from '../../utils/dates';
+import { formatDate, formatTime } from '@/utils/dates';
 
 export function DateTimeText({ value }: { value: string }) {
   return (

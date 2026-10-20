@@ -1,9 +1,9 @@
-import { PageHeader } from '../components/common/PageHeader';
-import { QueryState } from '../components/common/QueryState';
-import { TablePanel } from '../components/common/TablePanel';
-import { UserTable } from '../features/users/components/UserTable';
-import { useUsers } from '../features/users/hooks/useUsers';
-import { usePagination } from '../hooks/usePagination';
+import { PageHeader } from '@/components/common/PageHeader';
+import { QueryState } from '@/components/common/QueryState';
+import { TablePanel } from '@/components/common/TablePanel';
+import { UserTable } from '@/features/users/components/UserTable';
+import { useUsers } from '@/features/users/hooks/useUsers';
+import { usePagination } from '@/hooks/usePagination';
 
 export default function UsersPage() {
   const users = useUsers();

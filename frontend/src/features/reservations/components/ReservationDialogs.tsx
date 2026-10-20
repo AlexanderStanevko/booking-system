@@ -1,12 +1,16 @@
+import { lazy, Suspense } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import { QueryState } from '../../../components/common/QueryState';
-import type { Room } from '../../rooms/types/room';
-import type { User } from '../../users/types/user';
+import { QueryState } from '@/components/common/QueryState';
+import type { Room } from '@/features/rooms/types/room';
+import type { User } from '@/features/users/types/user';
 import { useReservation } from '../hooks/useReservations';
 import { useBookingConfiguration } from '../hooks/useBookingConfiguration';
 import type { ReservationDialog } from '../types/reservation';
 import { ReservationConfirmation } from './ReservationConfirmation';
-import { ReservationFormDialog } from './ReservationFormDialog';
+
+const ReservationFormDialog = lazy(() =>
+  import('./ReservationFormDialog').then((module) => ({ default: module.ReservationFormDialog })),
+);
 
 interface Props {
   dialog: ReservationDialog | null;
@@ -57,14 +61,36 @@ export function ReservationDialogs({ dialog, rooms, users, onClose, onSaved }: P
   }
   if (needsForm && configuration.data)
     return (
-      <ReservationFormDialog
-        reservation={reservation.data}
-        rooms={rooms}
-        users={users}
-        configuration={configuration.data}
-        onClose={onClose}
-        onSaved={onSaved}
-      />
+      <Suspense
+        fallback={
+          <Dialog
+            open
+            fullWidth
+            maxWidth="sm"
+            onClose={onClose}
+            aria-labelledby="reservation-form-loading-title"
+          >
+            <DialogTitle id="reservation-form-loading-title">
+              {dialog.kind === 'edit' ? 'Edit reservation' : 'New reservation'}
+            </DialogTitle>
+            <DialogContent>
+              <output aria-live="polite">Loading reservation form…</output>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={onClose}>Close</Button>
+            </DialogActions>
+          </Dialog>
+        }
+      >
+        <ReservationFormDialog
+          reservation={reservation.data}
+          rooms={rooms}
+          users={users}
+          configuration={configuration.data}
+          onClose={onClose}
+          onSaved={onSaved}
+        />
+      </Suspense>
     );
   if (dialog.kind === 'create' || dialog.kind === 'edit' || !reservation.data) return null;
   return (

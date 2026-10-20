@@ -1,6 +1,6 @@
 import { DateTimeInput } from './DateTimeInput';
-import type { DateRangeValues } from '../../utils/dates';
-import { dateRangeError, isValidLocalDateTime, toUtcTimestamp } from '../../utils/dates';
+import type { DateRangeValues } from '@/utils/dates';
+import { dateRangeError, isValidLocalDateTime, toUtcTimestamp } from '@/utils/dates';
 
 interface Props {
   value: DateRangeValues;

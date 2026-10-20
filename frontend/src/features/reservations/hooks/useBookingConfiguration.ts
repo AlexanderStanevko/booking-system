@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
-import { apiRequest } from '../../../api/client';
-import { queryKeys, queryPolicy } from '../../../api/queryClient';
+import { apiRequest } from '@/api/client';
+import { queryKeys, queryPolicy } from '@/api/queryClient';
 
 const bookingConfigurationSchema = z.object({
   maxDurationDays: z.number().int().positive(),

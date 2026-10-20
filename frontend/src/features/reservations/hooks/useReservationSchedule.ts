@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useClock } from '../../../hooks/useClock';
+import { useClock } from '@/hooks/useClock';
 import { invalidateReservationData } from '../api/reservationCache';
 import type { Reservation } from '../types/reservation';
 

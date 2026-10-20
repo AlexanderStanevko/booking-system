@@ -1,5 +1,5 @@
 import type { InvalidateOptions, QueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../../api/queryClient';
+import { queryKeys } from '@/api/queryClient';
 import type { Reservation } from '../types/reservation';
 
 export function invalidateReservationData(client: QueryClient, options?: InvalidateOptions) {

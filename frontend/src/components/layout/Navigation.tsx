@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import { NavLink, useLocation } from 'react-router';
-import { AppIcon, type IconName } from '../common/AppIcon';
+import { AppIcon, type IconName } from '@/components/common/AppIcon';
 
 const navigation: { path: string; label: string; icon: IconName }[] = [
   { path: '/rooms', label: 'Rooms', icon: 'rooms' },

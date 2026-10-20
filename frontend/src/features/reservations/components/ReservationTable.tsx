@@ -1,6 +1,6 @@
 import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import { DateTimeText } from '../../../components/common/DateTimeText';
-import { formatDateTime } from '../../../utils/dates';
+import { DateTimeText } from '@/components/common/DateTimeText';
+import { formatDateTime } from '@/utils/dates';
 import { statusColors } from '../reservationPresentation';
 import type { Reservation, ReservationAction } from '../types/reservation';
 import { ReservationActions } from './ReservationActions';

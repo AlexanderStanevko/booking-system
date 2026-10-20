@@ -1,7 +1,7 @@
 import { act } from 'react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { renderHook } from '../../../test/renderHook';
-import { millisecondsPerMinute } from '../../../utils/dates';
+import { renderHook } from '@/test/renderHook';
+import { millisecondsPerMinute } from '@/utils/dates';
 import { validValues, validationContext } from '../validation/reservationForm.fixtures';
 import type { Reservation } from '../types/reservation';
 import { useReservationForm } from './useReservationForm';

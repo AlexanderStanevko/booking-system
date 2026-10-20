@@ -1,5 +1,5 @@
 import { Button, Stack, Typography } from '@mui/material';
-import { AppIcon } from '../../../components/common/AppIcon';
+import { AppIcon } from '@/components/common/AppIcon';
 import { reservationEligibility } from '../reservationPresentation';
 import type { Reservation, ReservationAction } from '../types/reservation';
 

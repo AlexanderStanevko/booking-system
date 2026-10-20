@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Alert, Button, Paper, Skeleton, Stack, Typography } from '@mui/material';
-import { errorMessage } from '../../api/errors';
+import { errorMessage } from '@/api/errors';
 
 interface Props {
   pending: boolean;

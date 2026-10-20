@@ -1,4 +1,4 @@
-import { apiRequest, queryString } from '../../../api/client';
+import { apiRequest, queryString } from '@/api/client';
 import {
   reservationSchema,
   type ReservationFilters,

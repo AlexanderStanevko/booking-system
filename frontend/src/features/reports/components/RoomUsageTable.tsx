@@ -1,5 +1,5 @@
 import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import { formatNumber } from '../../../utils/numbers';
+import { formatNumber } from '@/utils/numbers';
 import type { RoomUsage } from '../types/roomUsage';
 
 export function RoomUsageTable({ reports }: { reports: RoomUsage[] }) {

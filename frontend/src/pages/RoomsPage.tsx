@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { PageHeader } from '../components/common/PageHeader';
-import { QueryState } from '../components/common/QueryState';
-import { TablePanel } from '../components/common/TablePanel';
-import { RoomFilters } from '../features/rooms/components/RoomFilters';
-import { RoomTable } from '../features/rooms/components/RoomTable';
-import { useRooms } from '../features/rooms/hooks/useRooms';
-import type { RoomFilters as Filters } from '../features/rooms/types/room';
-import { usePagination } from '../hooks/usePagination';
+import { PageHeader } from '@/components/common/PageHeader';
+import { QueryState } from '@/components/common/QueryState';
+import { TablePanel } from '@/components/common/TablePanel';
+import { RoomFilters } from '@/features/rooms/components/RoomFilters';
+import { RoomTable } from '@/features/rooms/components/RoomTable';
+import { useRooms } from '@/features/rooms/hooks/useRooms';
+import type { RoomFilters as Filters } from '@/features/rooms/types/room';
+import { usePagination } from '@/hooks/usePagination';
 
 export default function RoomsPage() {
   const [filters, setFilters] = useState<Filters>({});

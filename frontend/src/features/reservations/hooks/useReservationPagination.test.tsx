@@ -1,9 +1,9 @@
 import { act, type ChangeEvent, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { queryKeys, queryPolicy } from '../../../api/queryClient';
-import { usePagination } from '../../../hooks/usePagination';
-import { renderHook } from '../../../test/renderHook';
+import { queryKeys, queryPolicy } from '@/api/queryClient';
+import { usePagination } from '@/hooks/usePagination';
+import { renderHook } from '@/test/renderHook';
 import { changeReservationStatus, getReservations, saveReservation } from '../api/reservations';
 import { orderReservations } from '../reservationPresentation';
 import type { Reservation } from '../types/reservation';

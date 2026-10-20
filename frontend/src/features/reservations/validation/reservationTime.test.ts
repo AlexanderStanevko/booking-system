@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { millisecondsPerDay, toLocalDateTime } from '../../../utils/dates';
+import { millisecondsPerDay, toLocalDateTime } from '@/utils/dates';
 import {
   createReservationFormSchema,
   reservationFormDefaults,

@@ -4,10 +4,10 @@ import {
   millisecondsPerDay,
   reservationTimestamp,
   toLocalDateTime,
-} from '../../../utils/dates';
+} from '@/utils/dates';
 import type { Reservation, ReservationInput } from '../types/reservation';
-import type { Room } from '../../rooms/types/room';
-import type { User } from '../../users/types/user';
+import type { Room } from '@/features/rooms/types/room';
+import type { User } from '@/features/users/types/user';
 import type { BookingConfiguration } from '../hooks/useBookingConfiguration';
 
 export const maximumTitleLength = 200;

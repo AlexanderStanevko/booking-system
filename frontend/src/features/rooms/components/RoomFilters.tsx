@@ -8,7 +8,7 @@ import {
   Select,
   TextField,
 } from '@mui/material';
-import { FilterPanel } from '../../../components/common/FilterPanel';
+import { FilterPanel } from '@/components/common/FilterPanel';
 import { roomFilterSchema } from '../validation/roomFilters';
 import {
   equipmentLabels,

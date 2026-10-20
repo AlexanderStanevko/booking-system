@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Snackbar, Typography } from '@mui/material';
-import { AppIcon } from '../components/common/AppIcon';
-import { PageHeader } from '../components/common/PageHeader';
-import { QueryState } from '../components/common/QueryState';
-import { TablePanel } from '../components/common/TablePanel';
-import { ReservationDialogs } from '../features/reservations/components/ReservationDialogs';
-import { ReservationFilters } from '../features/reservations/components/ReservationFilters';
-import { ReservationTable } from '../features/reservations/components/ReservationTable';
-import { useReservations } from '../features/reservations/hooks/useReservations';
+import { AppIcon } from '@/components/common/AppIcon';
+import { PageHeader } from '@/components/common/PageHeader';
+import { QueryState } from '@/components/common/QueryState';
+import { TablePanel } from '@/components/common/TablePanel';
+import { ReservationDialogs } from '@/features/reservations/components/ReservationDialogs';
+import { ReservationFilters } from '@/features/reservations/components/ReservationFilters';
+import { ReservationTable } from '@/features/reservations/components/ReservationTable';
+import { useReservations } from '@/features/reservations/hooks/useReservations';
 import type {
   ReservationDialog,
   ReservationFilters as Filters,
-} from '../features/reservations/types/reservation';
-import { useRooms } from '../features/rooms/hooks/useRooms';
-import { useUsers } from '../features/users/hooks/useUsers';
-import { invalidateReservationData } from '../features/reservations/api/reservationCache';
-import { orderReservations } from '../features/reservations/reservationPresentation';
-import { usePagination } from '../hooks/usePagination';
+} from '@/features/reservations/types/reservation';
+import { useRooms } from '@/features/rooms/hooks/useRooms';
+import { useUsers } from '@/features/users/hooks/useUsers';
+import { invalidateReservationData } from '@/features/reservations/api/reservationCache';
+import { orderReservations } from '@/features/reservations/reservationPresentation';
+import { usePagination } from '@/hooks/usePagination';
 
 const notificationDuration = 6000;
 

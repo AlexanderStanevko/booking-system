@@ -1,5 +1,5 @@
-import type { Room } from '../../rooms/types/room';
-import type { User } from '../../users/types/user';
+import type { Room } from '@/features/rooms/types/room';
+import type { User } from '@/features/users/types/user';
 import type { ReservationFormValues } from './reservationForm';
 
 export const currentTime = Date.parse('2026-01-15T08:00:00Z');

@@ -1,6 +1,6 @@
 import { act } from 'react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { renderHook } from '../test/renderHook';
+import { renderHook } from '@/test/renderHook';
 import { useClock } from './useClock';
 
 const initialTime = Date.parse('2026-01-15T08:00:00Z');

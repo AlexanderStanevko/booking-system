@@ -9,11 +9,11 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
-import { errorMessage } from '../../../api/errors';
-import { AppIcon } from '../../../components/common/AppIcon';
-import { localTimeZone } from '../../../utils/dates';
-import type { Room } from '../../rooms/types/room';
-import type { User } from '../../users/types/user';
+import { errorMessage } from '@/api/errors';
+import { AppIcon } from '@/components/common/AppIcon';
+import { localTimeZone } from '@/utils/dates';
+import type { Room } from '@/features/rooms/types/room';
+import type { User } from '@/features/users/types/user';
 import { useSaveReservation } from '../hooks/useReservationMutations';
 import { useReservationForm } from '../hooks/useReservationForm';
 import type { BookingConfiguration } from '../hooks/useBookingConfiguration';

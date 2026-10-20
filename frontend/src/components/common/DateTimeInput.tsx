@@ -6,14 +6,14 @@ import {
   pickerBounds,
   toPickerDate,
   type DateTimeBounds,
-} from '../../utils/datePicker';
+} from '@/utils/datePicker';
 import {
   dateInputYears,
   isUnchangedTimestamp,
   isValidLocalDateTime,
   repeatedTimeHint,
   toLocalDateTime,
-} from '../../utils/dates';
+} from '@/utils/dates';
 
 interface Props {
   label: string;

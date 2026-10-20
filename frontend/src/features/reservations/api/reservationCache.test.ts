@@ -1,6 +1,6 @@
 import { QueryClient, QueryObserver } from '@tanstack/react-query';
 import { afterEach, expect, it, vi } from 'vitest';
-import { queryKeys, queryPolicy } from '../../../api/queryClient';
+import { queryKeys, queryPolicy } from '@/api/queryClient';
 import { invalidateReservationData, updateReservationCache } from './reservationCache';
 import { validValues } from '../validation/reservationForm.fixtures';
 import type { Reservation } from '../types/reservation';

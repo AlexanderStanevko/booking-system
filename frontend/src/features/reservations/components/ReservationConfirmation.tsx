@@ -7,7 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import { errorMessage } from '../../../api/errors';
+import { errorMessage } from '@/api/errors';
 import { useReservationAction } from '../hooks/useReservationMutations';
 import type { Reservation } from '../types/reservation';
 

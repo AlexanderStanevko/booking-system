@@ -1,6 +1,6 @@
 import { act, type ChangeEvent } from 'react';
 import { expect, it } from 'vitest';
-import { renderHook } from '../test/renderHook';
+import { renderHook } from '@/test/renderHook';
 import { usePagination } from './usePagination';
 
 const records = Array.from({ length: 51 }, (_, index) => index + 1);

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { DateRangeFields } from '../../../components/common/DateRangeFields';
-import { FilterPanel } from '../../../components/common/FilterPanel';
-import { SelectFilter } from '../../../components/common/SelectFilter';
-import { dateRangeError, dateRangeParameters } from '../../../utils/dates';
-import type { Room } from '../../rooms/types/room';
-import type { User } from '../../users/types/user';
+import { DateRangeFields } from '@/components/common/DateRangeFields';
+import { FilterPanel } from '@/components/common/FilterPanel';
+import { SelectFilter } from '@/components/common/SelectFilter';
+import { dateRangeError, dateRangeParameters } from '@/utils/dates';
+import type { Room } from '@/features/rooms/types/room';
+import type { User } from '@/features/users/types/user';
 import { reservationStatusSchema, type ReservationFilters as Filters } from '../types/reservation';
 
 const emptyFilters = { roomId: '', organizerId: '', status: '', from: '', to: '' };
