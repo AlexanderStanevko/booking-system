@@ -27,7 +27,7 @@ interface Props {
   users: User[];
   configuration: BookingConfiguration;
   onClose: () => void;
-  onSaved: (message: string) => void;
+  onSaved: (message: string, createdReservationId?: string) => void;
 }
 
 export function ReservationFormDialog({
@@ -46,7 +46,13 @@ export function ReservationFormDialog({
         id: reservation?.id,
         values: reservationFormRequest(values, reservation),
       },
-      { onSuccess: () => onSaved(reservation ? 'Reservation updated.' : 'Reservation created.') },
+      {
+        onSuccess: (saved) =>
+          onSaved(
+            reservation ? 'Reservation updated.' : 'Reservation created.',
+            reservation ? undefined : saved.id,
+          ),
+      },
     ),
   );
   return (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Snackbar, Typography } from '@mui/material';
 import { AppIcon } from '@/components/common/AppIcon';
@@ -9,7 +9,9 @@ import { ReservationDialogs } from '@/features/reservations/components/Reservati
 import { ReservationFilters } from '@/features/reservations/components/ReservationFilters';
 import { ReservationTable } from '@/features/reservations/components/ReservationTable';
 import { useReservations } from '@/features/reservations/hooks/useReservations';
+import { queryKeys } from '@/api/queryClient';
 import type {
+  Reservation,
   ReservationDialog,
   ReservationFilters as Filters,
 } from '@/features/reservations/types/reservation';
@@ -20,11 +22,13 @@ import { orderReservations } from '@/features/reservations/reservationPresentati
 import { usePagination } from '@/hooks/usePagination';
 
 const notificationDuration = 6000;
+const highlightDuration = 3000;
 
 export default function ReservationsPage() {
   const [filters, setFilters] = useState<Filters>({});
   const [dialog, setDialog] = useState<ReservationDialog | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [createdReservationId, setCreatedReservationId] = useState<string | null>(null);
   const reservations = useReservations(filters);
   const allReservations = reservations.data ?? [];
   const pagination = usePagination(orderReservations(allReservations), JSON.stringify(filters));
@@ -33,8 +37,28 @@ export default function ReservationsPage() {
   const client = useQueryClient();
   const pending = reservations.isPending || rooms.isPending || users.isPending;
   const error = reservations.error ?? rooms.error ?? users.error;
-  function saved(message: string) {
+  useEffect(() => {
+    if (!createdReservationId) return;
+    const timer = window.setTimeout(() => setCreatedReservationId(null), highlightDuration);
+    return () => window.clearTimeout(timer);
+  }, [createdReservationId]);
+  function saved(message: string, createdId?: string) {
     setDialog(null);
+    if (createdId) {
+      setCreatedReservationId(null);
+      const result = client.getQueryState<Reservation[]>([...queryKeys.reservationLists, filters]);
+      if (result?.status !== 'success') {
+        setNotice('Reservation created, but the list could not be refreshed. Refresh to find it.');
+        return;
+      }
+      const index = orderReservations(result.data ?? []).findIndex((item) => item.id === createdId);
+      if (index < 0) {
+        setNotice('Reservation created, but it is hidden by the current filters.');
+        return;
+      }
+      pagination.controls.onPageChange(null, Math.floor(index / pagination.controls.rowsPerPage));
+      setCreatedReservationId(createdId);
+    }
     setNotice(message);
   }
   return (
@@ -79,6 +103,7 @@ export default function ReservationsPage() {
           <ReservationTable
             reservations={allReservations}
             visibleReservations={pagination.items}
+            highlightedReservationId={createdReservationId}
             onAction={(kind, reservation) => setDialog({ kind, reservationId: reservation.id })}
           />
         </TablePanel>

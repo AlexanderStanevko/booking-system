@@ -17,7 +17,7 @@ interface Props {
   rooms: Room[];
   users: User[];
   onClose: () => void;
-  onSaved: (message: string) => void;
+  onSaved: (message: string, createdReservationId?: string) => void;
 }
 
 export function ReservationDialogs({ dialog, rooms, users, onClose, onSaved }: Props) {

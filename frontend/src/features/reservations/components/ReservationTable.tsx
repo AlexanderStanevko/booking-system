@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { DateTimeText } from '@/components/common/DateTimeText';
 import { formatDateTime } from '@/utils/dates';
@@ -9,11 +10,21 @@ import { useReservationSchedule } from '../hooks/useReservationSchedule';
 interface Props {
   reservations: Reservation[];
   visibleReservations: Reservation[];
+  highlightedReservationId?: string | null;
   onAction: (action: ReservationAction, reservation: Reservation) => void;
 }
 
-export function ReservationTable({ reservations, visibleReservations, onAction }: Props) {
+export function ReservationTable({
+  reservations,
+  visibleReservations,
+  highlightedReservationId,
+  onAction,
+}: Props) {
   const now = useReservationSchedule(reservations);
+  const highlightedRow = useRef<HTMLTableRowElement>(null);
+  useEffect(() => {
+    highlightedRow.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+  }, [highlightedReservationId]);
   return (
     <Table aria-label="Reservations">
       <TableHead>
@@ -34,7 +45,19 @@ export function ReservationTable({ reservations, visibleReservations, onAction }
       </TableHead>
       <TableBody>
         {visibleReservations.map((reservation) => (
-          <TableRow key={reservation.id} hover>
+          <TableRow
+            key={reservation.id}
+            hover={reservation.id !== highlightedReservationId}
+            ref={reservation.id === highlightedReservationId ? highlightedRow : null}
+            sx={
+              reservation.id === highlightedReservationId
+                ? {
+                    bgcolor: 'action.selected',
+                    scrollMarginBottom: '6rem',
+                  }
+                : undefined
+            }
+          >
             <TableCell sx={{ minWidth: 160 }}>
               <Typography variant="subtitle2">{reservation.title}</Typography>
             </TableCell>
