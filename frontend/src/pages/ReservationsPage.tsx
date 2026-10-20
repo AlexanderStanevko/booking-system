@@ -16,6 +16,8 @@ import type {
 import { useRooms } from '../features/rooms/hooks/useRooms';
 import { useUsers } from '../features/users/hooks/useUsers';
 import { invalidateReservationData } from '../features/reservations/api/reservationCache';
+import { orderReservations } from '../features/reservations/reservationPresentation';
+import { usePagination } from '../hooks/usePagination';
 
 const notificationDuration = 6000;
 
@@ -24,6 +26,8 @@ export default function ReservationsPage() {
   const [dialog, setDialog] = useState<ReservationDialog | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const reservations = useReservations(filters);
+  const allReservations = reservations.data ?? [];
+  const pagination = usePagination(orderReservations(allReservations), JSON.stringify(filters));
   const rooms = useRooms();
   const users = useUsers();
   const client = useQueryClient();
@@ -70,9 +74,11 @@ export default function ReservationsPage() {
           title="Meeting schedule"
           count={reservations.data?.length ?? 0}
           refreshing={reservations.isFetching}
+          pagination={pagination.controls}
         >
           <ReservationTable
-            reservations={reservations.data ?? []}
+            reservations={allReservations}
+            visibleReservations={pagination.items}
             onAction={(kind, reservation) => setDialog({ kind, reservationId: reservation.id })}
           />
         </TablePanel>

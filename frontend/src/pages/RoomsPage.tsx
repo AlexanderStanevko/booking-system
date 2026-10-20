@@ -6,10 +6,12 @@ import { RoomFilters } from '../features/rooms/components/RoomFilters';
 import { RoomTable } from '../features/rooms/components/RoomTable';
 import { useRooms } from '../features/rooms/hooks/useRooms';
 import type { RoomFilters as Filters } from '../features/rooms/types/room';
+import { usePagination } from '../hooks/usePagination';
 
 export default function RoomsPage() {
   const [filters, setFilters] = useState<Filters>({});
   const rooms = useRooms(filters);
+  const pagination = usePagination(rooms.data ?? [], JSON.stringify(filters));
   return (
     <>
       <PageHeader
@@ -29,8 +31,9 @@ export default function RoomsPage() {
           title="Meeting rooms"
           count={rooms.data?.length ?? 0}
           refreshing={rooms.isFetching}
+          pagination={pagination.controls}
         >
-          <RoomTable rooms={rooms.data ?? []} />
+          <RoomTable rooms={pagination.items} />
         </TablePanel>
       </QueryState>
     </>

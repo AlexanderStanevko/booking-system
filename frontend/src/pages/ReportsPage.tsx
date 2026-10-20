@@ -7,10 +7,12 @@ import { RoomUsageTable } from '../features/reports/components/RoomUsageTable';
 import { UsageFilters } from '../features/reports/components/UsageFilters';
 import { useRoomUsage } from '../features/reports/hooks/useRoomUsage';
 import type { RoomUsageFilters } from '../features/reports/types/roomUsage';
+import { usePagination } from '../hooks/usePagination';
 
 export default function ReportsPage() {
   const [filters, setFilters] = useState<RoomUsageFilters>({});
   const reports = useRoomUsage(filters);
+  const pagination = usePagination(reports.data ?? [], JSON.stringify(filters));
   return (
     <>
       <PageHeader
@@ -41,8 +43,9 @@ export default function ReportsPage() {
           title="Usage by room"
           count={reports.data?.length ?? 0}
           refreshing={reports.isFetching}
+          pagination={pagination.controls}
         >
-          <RoomUsageTable reports={reports.data ?? []} />
+          <RoomUsageTable reports={pagination.items} />
         </TablePanel>
       </QueryState>
     </>

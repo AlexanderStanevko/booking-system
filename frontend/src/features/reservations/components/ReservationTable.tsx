@@ -1,17 +1,18 @@
 import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { DateTimeText } from '../../../components/common/DateTimeText';
 import { formatDateTime } from '../../../utils/dates';
-import { orderReservations, statusColors } from '../reservationPresentation';
+import { statusColors } from '../reservationPresentation';
 import type { Reservation, ReservationAction } from '../types/reservation';
 import { ReservationActions } from './ReservationActions';
 import { useReservationSchedule } from '../hooks/useReservationSchedule';
 
 interface Props {
   reservations: Reservation[];
+  visibleReservations: Reservation[];
   onAction: (action: ReservationAction, reservation: Reservation) => void;
 }
 
-export function ReservationTable({ reservations, onAction }: Props) {
+export function ReservationTable({ reservations, visibleReservations, onAction }: Props) {
   const now = useReservationSchedule(reservations);
   return (
     <Table aria-label="Reservations">
@@ -32,7 +33,7 @@ export function ReservationTable({ reservations, onAction }: Props) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {orderReservations(reservations).map((reservation) => (
+        {visibleReservations.map((reservation) => (
           <TableRow key={reservation.id} hover>
             <TableCell sx={{ minWidth: 160 }}>
               <Typography variant="subtitle2">{reservation.title}</Typography>

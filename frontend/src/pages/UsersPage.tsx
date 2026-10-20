@@ -3,9 +3,11 @@ import { QueryState } from '../components/common/QueryState';
 import { TablePanel } from '../components/common/TablePanel';
 import { UserTable } from '../features/users/components/UserTable';
 import { useUsers } from '../features/users/hooks/useUsers';
+import { usePagination } from '../hooks/usePagination';
 
 export default function UsersPage() {
   const users = useUsers();
+  const pagination = usePagination(users.data ?? []);
   return (
     <>
       <PageHeader
@@ -25,8 +27,9 @@ export default function UsersPage() {
           title="Workspace directory"
           count={users.data?.length ?? 0}
           refreshing={users.isFetching}
+          pagination={pagination.controls}
         >
-          <UserTable users={users.data ?? []} />
+          <UserTable users={pagination.items} />
         </TablePanel>
       </QueryState>
     </>
