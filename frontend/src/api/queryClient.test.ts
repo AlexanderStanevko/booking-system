@@ -1,6 +1,6 @@
 import { QueryClient, QueryObserver } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { ApiError } from './client';
+import { ApiError } from './errors';
 import { queryClient, queryKeys, queryPolicy } from './queryClient';
 
 let client: QueryClient;

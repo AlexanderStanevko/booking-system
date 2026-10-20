@@ -9,7 +9,7 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
-import { errorMessage } from '../../../api/client';
+import { errorMessage } from '../../../api/errors';
 import { AppIcon } from '../../../components/common/AppIcon';
 import { localTimeZone } from '../../../utils/dates';
 import type { Room } from '../../rooms/types/room';

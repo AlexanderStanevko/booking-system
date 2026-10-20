@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
-import { ApiError } from './client';
+import { ApiError } from './errors';
 
 export const queryPolicy = {
   staleTime: 60_000,

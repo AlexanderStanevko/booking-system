@@ -1,18 +1,8 @@
 import { z } from 'zod';
+import { ApiError, apiErrorCodes } from './errors';
 
 const errorSchema = z.object({ code: z.string(), message: z.string() });
 const baseUrl = (import.meta.env.VITE_API_URL ?? 'http://localhost:5000').replace(/\/$/, '');
-
-export class ApiError extends Error {
-  constructor(
-    public readonly code: string,
-    message: string,
-    public readonly status: number,
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
 
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT';
@@ -25,34 +15,40 @@ export async function apiRequest<T>(
   schema: z.ZodType<T>,
   { method = 'GET', body, signal }: RequestOptions = {},
 ): Promise<T> {
-  let response: Response;
-  try {
-    response = await fetch(`${baseUrl}${path}`, {
-      method,
-      signal,
-      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') throw error;
-    throw new ApiError('NETWORK_ERROR', 'We could not reach the server. Please try again.', 0);
+  const options: RequestInit = { method, signal };
+  if (body !== undefined) {
+    options.headers = { 'Content-Type': 'application/json' };
+    options.body = JSON.stringify(body);
   }
 
-  const text = await response.text();
+  let response: Response;
+  try {
+    response = await fetch(`${baseUrl}${path}`, options);
+  } catch (error) {
+    if (signal?.aborted || (error instanceof Error && error.name === 'AbortError')) throw error;
+    if (!(error instanceof TypeError)) throw error;
+    throw new ApiError(
+      apiErrorCodes.networkError,
+      'We could not reach the server. Please try again.',
+      0,
+    );
+  }
+
   let payload: unknown;
   try {
-    payload = text ? JSON.parse(text) : undefined;
-  } catch {
-    payload = undefined;
+    payload = await response.json();
+  } catch (error) {
+    if (!(error instanceof SyntaxError)) throw error;
   }
 
   if (!response.ok) {
     const result = errorSchema.safeParse(payload);
+    if (result.success) {
+      throw new ApiError(result.data.code, result.data.message, response.status);
+    }
     throw new ApiError(
-      result.success ? result.data.code : 'HTTP_ERROR',
-      result.success
-        ? result.data.message
-        : 'The request could not be completed. Please try again.',
+      apiErrorCodes.httpError,
+      'The request could not be completed. Please try again.',
       response.status,
     );
   }
@@ -60,7 +56,7 @@ export async function apiRequest<T>(
   const result = schema.safeParse(payload);
   if (!result.success) {
     throw new ApiError(
-      'INVALID_RESPONSE',
+      apiErrorCodes.invalidResponse,
       'The server returned an unexpected response. Please try again.',
       response.status,
     );
@@ -75,8 +71,4 @@ export function queryString(values: Record<string, string | number | undefined>)
   }
   const query = parameters.toString();
   return query ? `?${query}` : '';
-}
-
-export function errorMessage(error: unknown): string {
-  return error instanceof ApiError ? error.message : 'Something went wrong. Please try again.';
 }
