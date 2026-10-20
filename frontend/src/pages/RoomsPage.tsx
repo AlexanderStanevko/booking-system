@@ -12,7 +12,12 @@ export default function RoomsPage() {
   const rooms = useRooms(filters);
   return (
     <>
-      <PageHeader title="Rooms" description="Find the right space for your next meeting." />
+      <PageHeader
+        title="Rooms"
+        description="Find the right space for your next meeting."
+        onRefresh={() => void rooms.refetch()}
+        refreshing={rooms.isFetching}
+      />
       <RoomFilters onApply={setFilters} />
       <QueryState
         pending={rooms.isPending}

@@ -9,38 +9,37 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { errorMessage } from '../../../api/client';
 import { AppIcon } from '../../../components/common/AppIcon';
 import { localTimeZone } from '../../../utils/dates';
 import type { Room } from '../../rooms/types/room';
 import type { User } from '../../users/types/user';
 import { useSaveReservation } from '../hooks/useReservationMutations';
+import { useReservationForm } from '../hooks/useReservationForm';
+import type { BookingConfiguration } from '../hooks/useBookingConfiguration';
 import type { Reservation } from '../types/reservation';
-import {
-  reservationFormDefaults,
-  reservationFormRequest,
-  reservationFormSchema,
-  type ReservationFormResult,
-  type ReservationFormValues,
-} from '../validation/reservationForm';
+import { reservationFormRequest } from '../validation/reservationForm';
 import { ReservationFormFields } from './ReservationFormFields';
 
 interface Props {
   reservation?: Reservation;
   rooms: Room[];
   users: User[];
+  configuration: BookingConfiguration;
   onClose: () => void;
   onSaved: (message: string) => void;
 }
 
-export function ReservationFormDialog({ reservation, rooms, users, onClose, onSaved }: Props) {
+export function ReservationFormDialog({
+  reservation,
+  rooms,
+  users,
+  configuration,
+  onClose,
+  onSaved,
+}: Props) {
   const mutation = useSaveReservation();
-  const form = useForm<ReservationFormValues, undefined, ReservationFormResult>({
-    resolver: zodResolver(reservationFormSchema),
-    defaultValues: reservationFormDefaults(reservation),
-  });
+  const form = useReservationForm({ reservation, rooms, users, configuration });
   const submit = form.handleSubmit((values) =>
     mutation.mutate(
       {
@@ -84,7 +83,13 @@ export function ReservationFormDialog({ reservation, rooms, users, onClose, onSa
             disabled={mutation.isPending}
             sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}
           >
-            <ReservationFormFields control={form.control} rooms={rooms} users={users} />
+            <ReservationFormFields
+              form={form}
+              rooms={rooms}
+              users={users}
+              reservation={reservation}
+              configuration={configuration}
+            />
           </Box>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2.5 }}>
             Local timezone: {localTimeZone.replaceAll('_', ' ')}.

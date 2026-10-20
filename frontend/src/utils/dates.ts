@@ -5,6 +5,9 @@ const dateFormat = new Intl.DateTimeFormat('en-GB', {
 });
 const timeFormat = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' });
 export const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+export const dateInputYears = { min: 1900, max: 2099 };
+export const millisecondsPerMinute = 60 * 1000;
+export const millisecondsPerDay = 24 * 60 * millisecondsPerMinute;
 
 export function formatDate(value: string): string {
   return dateFormat.format(new Date(value));
@@ -36,6 +39,8 @@ export function isValidLocalDateTime(value: string): boolean {
   if (!parts) return false;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return false;
+  if (date.getFullYear() < dateInputYears.min || date.getFullYear() > dateInputYears.max)
+    return false;
   const expected = [
     Number(parts[1]),
     Number(parts[2]),
@@ -60,6 +65,34 @@ export function isValidLocalDateTime(value: string): boolean {
 export function toUtcTimestamp(value: string): string {
   if (!isValidLocalDateTime(value)) throw new Error('Choose a valid local date and time.');
   return new Date(value).toISOString();
+}
+
+export function reservationTimestamp(value: string, original?: string): string {
+  const timestamp = toUtcTimestamp(value);
+  return original && toLocalDateTime(timestamp) === toLocalDateTime(original)
+    ? original
+    : timestamp;
+}
+
+export function isUnchangedTimestamp(value: string, original?: string): boolean {
+  return (
+    !!original && isValidLocalDateTime(value) && reservationTimestamp(value, original) === original
+  );
+}
+
+export function repeatedTimeHint(value: string): string | undefined {
+  if (!isValidLocalDateTime(value)) return;
+  const date = new Date(value);
+  const nextDay = new Date(date);
+  nextDay.setDate(nextDay.getDate() + 1);
+  const offsetChange = nextDay.getTimezoneOffset() - date.getTimezoneOffset();
+  if (offsetChange <= 0) return;
+  const later = new Date(date.getTime() + offsetChange * 60 * 1000);
+  if (toLocalDateTime(later.toISOString()) !== toLocalDateTime(date.toISOString())) return;
+  const offset = new Intl.DateTimeFormat('en-GB', { timeZoneName: 'longOffset' })
+    .formatToParts(date)
+    .find((part) => part.type === 'timeZoneName')?.value;
+  return `Clocks repeat this time. New selections use the earlier occurrence (${offset}).`;
 }
 
 export interface DateRangeValues {

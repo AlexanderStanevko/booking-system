@@ -11,6 +11,8 @@ export default function UsersPage() {
       <PageHeader
         title="Users"
         description="Your colleagues and the meetings they are organizing."
+        onRefresh={() => void users.refetch()}
+        refreshing={users.isFetching}
       />
       <QueryState
         pending={users.isPending}

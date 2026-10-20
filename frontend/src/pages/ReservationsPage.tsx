@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Snackbar, Typography } from '@mui/material';
 import { AppIcon } from '../components/common/AppIcon';
 import { PageHeader } from '../components/common/PageHeader';
@@ -14,7 +15,7 @@ import type {
 } from '../features/reservations/types/reservation';
 import { useRooms } from '../features/rooms/hooks/useRooms';
 import { useUsers } from '../features/users/hooks/useUsers';
-import { useClock } from '../hooks/useClock';
+import { invalidateReservationData } from '../features/reservations/api/reservationCache';
 
 const notificationDuration = 6000;
 
@@ -25,7 +26,7 @@ export default function ReservationsPage() {
   const reservations = useReservations(filters);
   const rooms = useRooms();
   const users = useUsers();
-  const now = useClock();
+  const client = useQueryClient();
   const pending = reservations.isPending || rooms.isPending || users.isPending;
   const error = reservations.error ?? rooms.error ?? users.error;
   function saved(message: string) {
@@ -37,6 +38,8 @@ export default function ReservationsPage() {
       <PageHeader
         title="Reservations"
         description="Book a space, coordinate meetings, and keep your day moving."
+        onRefresh={() => void invalidateReservationData(client)}
+        refreshing={reservations.isFetching || users.isFetching}
         action={
           <Button
             variant="contained"
@@ -55,9 +58,9 @@ export default function ReservationsPage() {
         empty={reservations.data?.length === 0}
         emptyMessage="No meetings match these filters. Adjust the filters or create a reservation."
         onRetry={() => {
-          void reservations.refetch();
-          void rooms.refetch();
-          void users.refetch();
+          for (const query of [reservations, rooms, users]) {
+            if (query.error) void query.refetch();
+          }
         }}
       >
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
@@ -70,14 +73,12 @@ export default function ReservationsPage() {
         >
           <ReservationTable
             reservations={reservations.data ?? []}
-            now={now}
             onAction={(kind, reservation) => setDialog({ kind, reservationId: reservation.id })}
           />
         </TablePanel>
       </QueryState>
       <ReservationDialogs
         dialog={dialog}
-        reservations={reservations.data ?? []}
         rooms={rooms.data ?? []}
         users={users.data ?? []}
         onClose={() => setDialog(null)}

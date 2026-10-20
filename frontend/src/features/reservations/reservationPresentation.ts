@@ -2,9 +2,9 @@ import type { ChipProps } from '@mui/material';
 import type { Reservation, ReservationStatus } from './types/reservation';
 
 export const statusColors = {
-  Booked: 'primary',
+  Booked: 'info',
   Completed: 'success',
-  Cancelled: 'default',
+  Cancelled: 'error',
 } satisfies Record<ReservationStatus, ChipProps['color']>;
 
 export function reservationEligibility(reservation: Reservation, now: number) {

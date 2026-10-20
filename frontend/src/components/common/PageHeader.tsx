@@ -1,13 +1,15 @@
 import type { ReactNode } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 
 interface Props {
   title: string;
   description: string;
   action?: ReactNode;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
-export function PageHeader({ title, description, action }: Props) {
+export function PageHeader({ title, description, action, onRefresh, refreshing }: Props) {
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
@@ -25,7 +27,18 @@ export function PageHeader({ title, description, action }: Props) {
           {description}
         </Typography>
       </Box>
-      {action}
+      <Stack direction="row" spacing={1}>
+        {onRefresh && (
+          <Button
+            onClick={onRefresh}
+            disabled={refreshing}
+            aria-label={`Refresh ${title.toLowerCase()}`}
+          >
+            Refresh
+          </Button>
+        )}
+        {action}
+      </Stack>
     </Stack>
   );
 }

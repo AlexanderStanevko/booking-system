@@ -3,38 +3,31 @@ import { QueryState } from '../../../components/common/QueryState';
 import type { Room } from '../../rooms/types/room';
 import type { User } from '../../users/types/user';
 import { useReservation } from '../hooks/useReservations';
-import type { Reservation, ReservationDialog } from '../types/reservation';
+import { useBookingConfiguration } from '../hooks/useBookingConfiguration';
+import type { ReservationDialog } from '../types/reservation';
 import { ReservationConfirmation } from './ReservationConfirmation';
 import { ReservationFormDialog } from './ReservationFormDialog';
 
 interface Props {
   dialog: ReservationDialog | null;
-  reservations: Reservation[];
   rooms: Room[];
   users: User[];
   onClose: () => void;
   onSaved: (message: string) => void;
 }
 
-export function ReservationDialogs({
-  dialog,
-  reservations,
-  rooms,
-  users,
-  onClose,
-  onSaved,
-}: Props) {
-  const reservationId = dialog && dialog.kind !== 'create' ? dialog.reservationId : undefined;
+export function ReservationDialogs({ dialog, rooms, users, onClose, onSaved }: Props) {
+  const needsForm = dialog?.kind === 'create' || dialog?.kind === 'edit';
+  const configuration = useBookingConfiguration(needsForm);
   const reservation = useReservation(
-    reservationId,
-    reservations.find((item) => item.id === reservationId),
+    dialog && dialog.kind !== 'create' ? dialog.reservationId : undefined,
   );
   if (!dialog) return null;
-  if (dialog.kind === 'create')
-    return (
-      <ReservationFormDialog rooms={rooms} users={users} onClose={onClose} onSaved={onSaved} />
-    );
-  if (reservation.isPending || reservation.error || !reservation.data) {
+  const pending =
+    (needsForm && configuration.isPending) ||
+    (dialog.kind !== 'create' && (reservation.isPending || reservation.isFetching));
+  const error = (needsForm && configuration.error) || reservation.error;
+  if (pending || error) {
     return (
       <Dialog
         open
@@ -46,9 +39,12 @@ export function ReservationDialogs({
         <DialogTitle id="reservation-details-title">Reservation details</DialogTitle>
         <DialogContent>
           <QueryState
-            pending={reservation.isPending}
-            error={reservation.error}
-            onRetry={() => void reservation.refetch()}
+            pending={pending}
+            error={error || null}
+            onRetry={() => {
+              if (configuration.error) void configuration.refetch();
+              if (reservation.error) void reservation.refetch();
+            }}
           >
             {null}
           </QueryState>
@@ -59,17 +55,18 @@ export function ReservationDialogs({
       </Dialog>
     );
   }
-  if (dialog.kind === 'edit')
+  if (needsForm && configuration.data)
     return (
       <ReservationFormDialog
-        key={reservation.data.id}
         reservation={reservation.data}
         rooms={rooms}
         users={users}
+        configuration={configuration.data}
         onClose={onClose}
         onSaved={onSaved}
       />
     );
+  if (dialog.kind === 'create' || dialog.kind === 'edit' || !reservation.data) return null;
   return (
     <ReservationConfirmation
       action={dialog.kind}

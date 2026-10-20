@@ -2,14 +2,16 @@ import { QueryClient } from '@tanstack/react-query';
 import { ApiError } from './client';
 
 export const queryPolicy = {
-  staleTime: 15_000,
-  refreshInterval: 30_000,
+  staleTime: 60_000,
+  referenceStaleTime: 5 * 60_000,
 };
 
 export const queryKeys = {
   rooms: ['rooms'],
   users: ['users'],
-  reservations: ['reservations'],
+  reservationLists: ['reservations', 'list'],
+  reservationDetail: (id?: string) => ['reservations', 'detail', id] as const,
+  bookingConfiguration: ['booking-configuration'],
   reports: ['room-usage'],
 } as const;
 

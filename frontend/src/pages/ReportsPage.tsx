@@ -16,6 +16,8 @@ export default function ReportsPage() {
       <PageHeader
         title="Room usage"
         description="Understand how scheduled time compares with recorded and estimated usage."
+        onRefresh={() => void reports.refetch()}
+        refreshing={reports.isFetching}
       />
       <Alert severity="info" sx={{ mb: 3 }}>
         <Typography variant="subtitle2" sx={{ mb: 0.5 }}>

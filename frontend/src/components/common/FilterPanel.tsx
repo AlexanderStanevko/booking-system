@@ -16,7 +16,13 @@ export function FilterPanel({ children, onApply, onReset, error }: Props) {
     onApply();
   }
   return (
-    <Paper component="form" variant="outlined" onSubmit={handleSubmit} sx={{ p: 2.5, mb: 3 }}>
+    <Paper
+      component="form"
+      noValidate
+      variant="outlined"
+      onSubmit={handleSubmit}
+      sx={{ p: 2.5, mb: 3 }}
+    >
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 2.5 }}>
         <AppIcon name="filter" fontSize="small" color="action" />
         <Typography variant="subtitle2">Filters</Typography>

@@ -4,14 +4,15 @@ import { formatDateTime } from '../../../utils/dates';
 import { orderReservations, statusColors } from '../reservationPresentation';
 import type { Reservation, ReservationAction } from '../types/reservation';
 import { ReservationActions } from './ReservationActions';
+import { useReservationSchedule } from '../hooks/useReservationSchedule';
 
 interface Props {
   reservations: Reservation[];
-  now: number;
   onAction: (action: ReservationAction, reservation: Reservation) => void;
 }
 
-export function ReservationTable({ reservations, now, onAction }: Props) {
+export function ReservationTable({ reservations, onAction }: Props) {
+  const now = useReservationSchedule(reservations);
   return (
     <Table aria-label="Reservations">
       <TableHead>

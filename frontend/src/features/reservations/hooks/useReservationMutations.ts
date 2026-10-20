@@ -1,20 +1,12 @@
-import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../../api/queryClient';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { changeReservationStatus, saveReservation } from '../api/reservations';
-
-function invalidateReservationData(client: QueryClient) {
-  return Promise.all(
-    [queryKeys.reservations, queryKeys.users, queryKeys.reports].map((queryKey) =>
-      client.invalidateQueries({ queryKey }),
-    ),
-  );
-}
+import { updateReservationCache } from '../api/reservationCache';
 
 export function useSaveReservation() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: saveReservation,
-    onSuccess: () => invalidateReservationData(client),
+    onSuccess: (reservation) => updateReservationCache(client, reservation),
   });
 }
 
@@ -22,6 +14,6 @@ export function useReservationAction() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: changeReservationStatus,
-    onSuccess: () => invalidateReservationData(client),
+    onSuccess: (reservation) => updateReservationCache(client, reservation),
   });
 }

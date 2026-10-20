@@ -1,24 +1,42 @@
 import { Box, TextField } from '@mui/material';
-import { Controller, useWatch, type Control } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
+import { DateTimeInput } from '../../../components/common/DateTimeInput';
+import { millisecondsPerDay } from '../../../utils/dates';
 import type { Room } from '../../rooms/types/room';
 import type { User } from '../../users/types/user';
-import type { ReservationFormResult, ReservationFormValues } from '../validation/reservationForm';
+import type { ReservationForm } from '../hooks/useReservationForm';
+import type { Reservation } from '../types/reservation';
+import { RoomSelect } from './RoomSelect';
+import type { BookingConfiguration } from '../hooks/useBookingConfiguration';
 
 const textFields = [
-  { name: 'startTime', label: 'Start date and time', type: 'datetime-local' },
-  { name: 'endTime', label: 'End date and time', type: 'datetime-local' },
-  { name: 'attendeeCount', label: 'Number of attendees', type: 'number' },
+  { name: 'startTime', label: 'Start date and time' },
+  { name: 'endTime', label: 'End date and time' },
 ] as const;
 
 interface Props {
-  control: Control<ReservationFormValues, undefined, ReservationFormResult>;
+  form: ReservationForm;
   rooms: Room[];
   users: User[];
+  reservation?: Reservation;
+  configuration: BookingConfiguration;
 }
 
-export function ReservationFormFields({ control, rooms, users }: Props) {
-  const roomId = useWatch({ control, name: 'roomId' });
-  const room = rooms.find((item) => item.id === roomId);
+export function ReservationFormFields({ form, rooms, users, reservation, configuration }: Props) {
+  const { control, now, startTimestamp } = form;
+  const dateBounds = {
+    startTime: {
+      after: now,
+      through: now + configuration.maxAdvanceBookingDays * millisecondsPerDay,
+    },
+    endTime: {
+      after: Math.max(startTimestamp ?? now, now),
+      through:
+        startTimestamp === undefined
+          ? undefined
+          : startTimestamp + configuration.maxDurationDays * millisecondsPerDay,
+    },
+  };
   return (
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
       <Controller
@@ -39,27 +57,16 @@ export function ReservationFormFields({ control, rooms, users }: Props) {
         name="roomId"
         control={control}
         render={({ field: { ref, ...field }, fieldState }) => (
-          <TextField
+          <RoomSelect
             {...field}
             inputRef={ref}
-            id="reservation-room"
-            select
-            label="Room"
-            error={!!fieldState.error}
-            helperText={
-              fieldState.error?.message ??
-              (room && `Capacity: ${room.capacity} people · Floor ${room.floor}`)
-            }
-            slotProps={{ select: { native: true }, inputLabel: { shrink: true } }}
-          >
-            <option value="">Choose a room</option>
-            {rooms.map((item) => (
-              <option key={item.id} value={item.id} disabled={!item.isActive}>
-                {item.name}
-                {!item.isActive && ' (inactive)'}
-              </option>
-            ))}
-          </TextField>
+            rooms={rooms}
+            error={fieldState.error?.message}
+            onChange={(value) => {
+              field.onChange(value);
+              void form.trigger('attendeeCount');
+            }}
+          />
         )}
       />
       <Controller
@@ -85,27 +92,43 @@ export function ReservationFormFields({ control, rooms, users }: Props) {
           </TextField>
         )}
       />
-      {textFields.map(({ name, label, type }) => (
+      {textFields.map(({ name, label }) => (
         <Controller
           key={name}
           name={name}
           control={control}
           render={({ field: { ref, ...field }, fieldState }) => (
-            <TextField
+            <DateTimeInput
               {...field}
               inputRef={ref}
               label={label}
-              type={type}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              slotProps={{
-                inputLabel: { shrink: true },
-                htmlInput: type === 'number' ? { min: 1, step: 1 } : { step: 'any' },
+              error={fieldState.error?.message}
+              originalTimestamp={reservation?.[name]}
+              bounds={dateBounds[name]}
+              onOpenChange={form.onPickerOpenChange}
+              onChange={(value) => {
+                field.onChange(value);
+                if (name === 'startTime' && form.getValues('endTime')) void form.trigger('endTime');
               }}
             />
           )}
         />
       ))}
+      <Controller
+        name="attendeeCount"
+        control={control}
+        render={({ field: { ref, ...field }, fieldState }) => (
+          <TextField
+            {...field}
+            inputRef={ref}
+            label="Number of attendees"
+            type="number"
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            slotProps={{ htmlInput: { min: 1, step: 1 } }}
+          />
+        )}
+      />
     </Box>
   );
 }

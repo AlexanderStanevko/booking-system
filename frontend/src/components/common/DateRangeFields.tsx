@@ -1,5 +1,6 @@
-import { TextField } from '@mui/material';
+import { DateTimeInput } from './DateTimeInput';
 import type { DateRangeValues } from '../../utils/dates';
+import { dateRangeError, isValidLocalDateTime, toUtcTimestamp } from '../../utils/dates';
 
 interface Props {
   value: DateRangeValues;
@@ -7,21 +8,27 @@ interface Props {
 }
 
 export function DateRangeFields({ value, onChange }: Props) {
+  const rangeError =
+    isValidLocalDateTime(value.from) && isValidLocalDateTime(value.to)
+      ? dateRangeError(value)
+      : null;
   return (
     <>
-      <TextField
+      <DateTimeInput
         label="From"
-        type="datetime-local"
         value={value.from}
-        onChange={(event) => onChange({ ...value, from: event.target.value })}
-        slotProps={{ inputLabel: { shrink: true }, htmlInput: { step: 'any' } }}
+        onChange={(from) => onChange({ ...value, from })}
       />
-      <TextField
+      <DateTimeInput
         label="To"
-        type="datetime-local"
         value={value.to}
-        onChange={(event) => onChange({ ...value, to: event.target.value })}
-        slotProps={{ inputLabel: { shrink: true }, htmlInput: { step: 'any' } }}
+        bounds={{
+          after: isValidLocalDateTime(value.from)
+            ? Date.parse(toUtcTimestamp(value.from))
+            : undefined,
+        }}
+        error={rangeError ?? undefined}
+        onChange={(to) => onChange({ ...value, to })}
       />
     </>
   );

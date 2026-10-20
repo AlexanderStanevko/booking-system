@@ -9,6 +9,7 @@ import {
   TextField,
 } from '@mui/material';
 import { FilterPanel } from '../../../components/common/FilterPanel';
+import { roomFilterSchema } from '../validation/roomFilters';
 import {
   equipmentLabels,
   equipmentSchema,
@@ -20,30 +21,43 @@ export function RoomFilters({ onApply }: { onApply: (filters: Filters) => void }
   const [minCapacity, setMinCapacity] = useState('');
   const [floor, setFloor] = useState('');
   const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [errors, setErrors] = useState<{ minCapacity?: string; floor?: string }>({});
+  function validate() {
+    const result = roomFilterSchema.safeParse({ minCapacity, floor });
+    setErrors(
+      result.success
+        ? {}
+        : {
+            minCapacity: result.error.issues.find((issue) => issue.path[0] === 'minCapacity')
+              ?.message,
+            floor: result.error.issues.find((issue) => issue.path[0] === 'floor')?.message,
+          },
+    );
+    return result;
+  }
+  function apply() {
+    const result = validate();
+    if (!result.success) return;
+    onApply({ ...result.data, equipment: equipment.length ? equipment : undefined });
+  }
   function reset() {
     setMinCapacity('');
     setFloor('');
     setEquipment([]);
+    setErrors({});
     onApply({});
   }
   return (
-    <FilterPanel
-      onReset={reset}
-      onApply={() =>
-        onApply({
-          minCapacity: minCapacity ? Number(minCapacity) : undefined,
-          floor: floor ? Number(floor) : undefined,
-          equipment: equipment.length ? equipment : undefined,
-        })
-      }
-    >
+    <FilterPanel onReset={reset} onApply={apply}>
       <TextField
         label="Minimum capacity"
-        type="number"
         placeholder="Any capacity"
         value={minCapacity}
         onChange={(event) => setMinCapacity(event.target.value)}
-        slotProps={{ htmlInput: { min: 1, step: 1 } }}
+        onBlur={validate}
+        error={!!errors.minCapacity}
+        helperText={errors.minCapacity}
+        slotProps={{ htmlInput: { inputMode: 'numeric' } }}
       />
       <FormControl>
         <InputLabel id="equipment-label">Equipment</InputLabel>
@@ -75,11 +89,13 @@ export function RoomFilters({ onApply }: { onApply: (filters: Filters) => void }
       </FormControl>
       <TextField
         label="Floor"
-        type="number"
         placeholder="Any floor"
         value={floor}
         onChange={(event) => setFloor(event.target.value)}
-        slotProps={{ htmlInput: { step: 1 } }}
+        onBlur={validate}
+        error={!!errors.floor}
+        helperText={errors.floor}
+        slotProps={{ htmlInput: { inputMode: 'numeric' } }}
       />
     </FilterPanel>
   );
