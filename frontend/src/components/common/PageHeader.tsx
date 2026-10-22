@@ -3,7 +3,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 
 interface Props {
   title: string;
-  description: string;
+  description?: string;
   action?: ReactNode;
   onRefresh?: () => void;
   refreshing?: boolean;
@@ -17,15 +17,14 @@ export function PageHeader({ title, description, action, onRefresh, refreshing }
       sx={{ justifyContent: 'space-between', alignItems: { sm: 'center' }, mb: 4 }}
     >
       <Box>
-        <Typography variant="overline" color="primary">
-          Workspace
-        </Typography>
-        <Typography component="h1" variant="h4" sx={{ mb: 1 }}>
+        <Typography component="h1" variant="h4" sx={{ mb: description ? 1 : 0 }}>
           {title}
         </Typography>
-        <Typography color="text.secondary" variant="body2">
-          {description}
-        </Typography>
+        {description && (
+          <Typography color="text.secondary" variant="body2">
+            {description}
+          </Typography>
+        )}
       </Box>
       <Stack direction="row" spacing={1}>
         {onRefresh && (

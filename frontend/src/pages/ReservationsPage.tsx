@@ -65,7 +65,6 @@ export default function ReservationsPage() {
     <>
       <PageHeader
         title="Reservations"
-        description="Book a space, coordinate meetings, and keep your day moving."
         onRefresh={() => void invalidateReservationData(client)}
         refreshing={reservations.isFetching || users.isFetching}
         action={

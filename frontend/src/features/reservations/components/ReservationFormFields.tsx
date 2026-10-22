@@ -1,4 +1,4 @@
-import { Box, TextField } from '@mui/material';
+import { Autocomplete, Box, TextField } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { DateTimeInput } from '@/components/common/DateTimeInput';
 import { millisecondsPerDay } from '@/utils/dates';
@@ -72,24 +72,27 @@ export function ReservationFormFields({ form, rooms, users, reservation, configu
       <Controller
         name="organizerId"
         control={control}
-        render={({ field: { ref, ...field }, fieldState }) => (
-          <TextField
-            {...field}
-            inputRef={ref}
+        render={({ field, fieldState }) => (
+          <Autocomplete
             id="reservation-organizer"
-            select
-            label="Organizer"
-            error={!!fieldState.error}
-            helperText={fieldState.error?.message}
-            slotProps={{ select: { native: true }, inputLabel: { shrink: true } }}
-          >
-            <option value="">Choose an organizer</option>
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.firstName} {user.lastName}
-              </option>
-            ))}
-          </TextField>
+            options={users}
+            value={users.find((user) => user.id === field.value) ?? null}
+            onChange={(_, user) => field.onChange(user?.id ?? '')}
+            onBlur={field.onBlur}
+            getOptionLabel={(user) => `${user.firstName} ${user.lastName}`}
+            isOptionEqualToValue={(user, value) => user.id === value.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                name={field.name}
+                inputRef={field.ref}
+                label="Organizer"
+                placeholder="Choose an organizer"
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+              />
+            )}
+          />
         )}
       />
       {textFields.map(({ name, label }) => (

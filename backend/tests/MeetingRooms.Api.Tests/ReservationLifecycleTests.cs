@@ -20,36 +20,38 @@ public sealed class ReservationLifecycleTests
         Assert.Equal(StatusCodes.Status409Conflict, error.StatusCode);
     }
 
-    [Theory]
-    [InlineData(ReservationStatus.Cancelled)]
-    [InlineData(ReservationStatus.Completed)]
-    public async Task Nonbooked_reservations_cannot_be_completed(ReservationStatus status)
+    [Fact]
+    public async Task Nonbooked_reservations_cannot_be_completed()
     {
-        await using var context = new BookingTestContext();
-        var existing = await context.AddReservationAsync(reservation => reservation.Status = status);
-        var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CompleteAsync(existing.Id));
-        Assert.Equal(ErrorCodes.InvalidReservationStatus, error.Code);
+        foreach (var status in new[] { ReservationStatus.Cancelled, ReservationStatus.Completed })
+        {
+            await using var context = new BookingTestContext();
+            var existing = await context.AddReservationAsync(reservation => reservation.Status = status);
+            var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CompleteAsync(existing.Id));
+            Assert.Equal(ErrorCodes.InvalidReservationStatus, error.Code);
+        }
     }
 
-    [Theory]
-    [InlineData(-30)]
-    [InlineData(0)]
-    public async Task Ongoing_meeting_can_end_early_including_at_its_start(int startMinutes)
+    [Fact]
+    public async Task Ongoing_meeting_can_end_early_including_at_its_start()
     {
-        await using var context = new BookingTestContext();
-        var now = context.Clock.GetUtcNow();
-        var existing = await context.AddReservationAsync(reservation =>
+        foreach (var startMinutes in new[] { -30, 0 })
         {
-            reservation.StartTime = now.AddMinutes(startMinutes);
-            reservation.EndTime = now.AddHours(1);
-        });
-        var scheduledEnd = existing.EndTime;
-        var result = await context.Reservations.CompleteAsync(existing.Id);
-        Assert.Equal(ReservationStatus.Completed, result.Status);
-        Assert.Equal(now, result.ActualEndTime);
-        Assert.Equal(TimeSpan.Zero, result.ActualEndTime!.Value.Offset);
-        Assert.Equal(scheduledEnd, result.EndTime);
-        Assert.Contains(await context.Queries.ListAsync(new()), entry => entry.Id == existing.Id);
+            await using var context = new BookingTestContext();
+            var now = context.Clock.GetUtcNow();
+            var existing = await context.AddReservationAsync(reservation =>
+            {
+                reservation.StartTime = now.AddMinutes(startMinutes);
+                reservation.EndTime = now.AddHours(1);
+            });
+            var scheduledEnd = existing.EndTime;
+            var result = await context.Reservations.CompleteAsync(existing.Id);
+            Assert.Equal(ReservationStatus.Completed, result.Status);
+            Assert.Equal(now, result.ActualEndTime);
+            Assert.Equal(TimeSpan.Zero, result.ActualEndTime!.Value.Offset);
+            Assert.Equal(scheduledEnd, result.EndTime);
+            Assert.Contains(await context.Queries.ListAsync(new()), entry => entry.Id == existing.Id);
+        }
     }
 
     [Fact]

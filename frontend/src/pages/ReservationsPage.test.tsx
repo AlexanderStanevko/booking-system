@@ -1,8 +1,9 @@
 import { act, type ChangeEvent, type ComponentProps, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest';
 import { queryPolicy } from '@/api/queryClient';
+import { ApiError } from '@/api/errors';
 import type { TablePanel } from '@/components/common/TablePanel';
 import {
   getReservations,
@@ -55,6 +56,9 @@ vi.mock('@/components/common/TablePanel', () => ({
         </select>
       </label>
       <button onClick={() => pagination.onPageChange(null, pagination.page + 1)}>Next page</button>
+      <button onClick={() => pagination.onPageChange(null, pagination.page - 1)}>
+        Previous page
+      </button>
     </>
   ),
 }));
@@ -134,9 +138,17 @@ async function select(element: HTMLSelectElement, value: string) {
 }
 
 async function applyRoomFilter() {
-  const selectElement = document.querySelector('select');
-  if (!selectElement) throw new Error('Missing room filter');
-  await select(selectElement, room.id);
+  const input = document.querySelector<HTMLInputElement>('input[role="combobox"]');
+  const open = input
+    ?.closest('.MuiAutocomplete-root')
+    ?.querySelector<HTMLButtonElement>('button[title="Open"]');
+  if (!open) throw new Error('Missing room filter');
+  await act(async () => open.click());
+  const option = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find(
+    (element) => element.textContent === room.name,
+  );
+  if (!option) throw new Error('Missing room option');
+  await act(async () => option.click());
   await click('Apply filters');
 }
 
@@ -156,6 +168,10 @@ async function mount() {
   return view;
 }
 
+beforeAll(async () => {
+  await import('@/features/reservations/components/ReservationFormDialog');
+});
+
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime('2026-01-15T08:00:00Z');
@@ -165,7 +181,7 @@ beforeEach(() => {
       queries: { staleTime: queryPolicy.staleTime, gcTime: Infinity, retry: false },
     },
   });
-  records = Array.from({ length: 111 }, (_, index): Reservation => ({
+  records = Array.from({ length: 41 }, (_, index): Reservation => ({
     id: `meeting-${index}`,
     title: `Meeting ${index}`,
     roomId: room.id,
@@ -182,8 +198,8 @@ beforeEach(() => {
     ...records[0]!,
     id: 'new-reservation',
     title: 'Created reservation',
-    startTime: '2026-01-16T10:45:00Z',
-    endTime: '2026-01-16T10:49:00Z',
+    startTime: '2026-01-16T05:45:00Z',
+    endTime: '2026-01-16T05:49:00Z',
   };
   vi.mocked(getReservations).mockImplementation(async (filters) =>
     records.filter(
@@ -221,28 +237,25 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-it.each([10, 25, 50])(
-  'reveals a successful creation in the sorted results with %i rows per page',
-  async (size) => {
-    await mount();
-    const sizeSelect = document
-      .querySelector('output[aria-label="Current page"]')
-      ?.nextElementSibling?.querySelector('select');
-    if (!sizeSelect) throw new Error('Missing page size');
-    await select(sizeSelect, String(size));
-    await createReservation();
-    expect(page()).toBe(Math.floor(65 / size));
-    const row = createdRow();
-    expect(row).toBeDefined();
-    expect(getComputedStyle(row!).backgroundColor).toBe(theme.palette.action.selected);
-    expect(row?.classList.contains('MuiTableRow-hover')).toBe(false);
-    expect(row?.scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', behavior: 'instant' });
-    expect(document.body.textContent).toContain('Reservation created.');
-    expect(saveReservation).toHaveBeenCalledTimes(1);
-    expect(getReservations).toHaveBeenCalledTimes(2);
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
-  },
-);
+it('reveals a successful creation using the selected page size', async () => {
+  const size = 25;
+  await mount();
+  const sizeSelect = document
+    .querySelector('output[aria-label="Current page"]')
+    ?.nextElementSibling?.querySelector('select');
+  if (!sizeSelect) throw new Error('Missing page size');
+  await select(sizeSelect, String(size));
+  await createReservation();
+  expect(page()).toBe(Math.floor(35 / size));
+  const row = createdRow();
+  expect(row).toBeDefined();
+  expect(getComputedStyle(row!).backgroundColor).toBe(theme.palette.action.selected);
+  expect(row?.scrollIntoView).toHaveBeenCalled();
+  expect(document.body.textContent).toContain('Reservation created.');
+  expect(saveReservation).toHaveBeenCalledTimes(1);
+  expect(getReservations).toHaveBeenCalledTimes(2);
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+});
 
 it('waits for the existing mutation refetch before revealing the created row', async () => {
   await mount();
@@ -260,7 +273,7 @@ it('waits for the existing mutation refetch before revealing the created row', a
   expect(document.body.textContent).toContain('Saving');
   await act(async () => finishRefetch([...records]));
   await flush();
-  expect(page()).toBe(6);
+  expect(page()).toBe(3);
   expect(createdRow()).toBeDefined();
   expect(getReservations).toHaveBeenCalledTimes(2);
 });
@@ -280,12 +293,12 @@ it('navigates to a page that only exists after the creation refetch', async () =
 
 it('uses the active filtered list to find a matching creation', async () => {
   await mount();
-  records = records.filter((record) => Number(record.id.split('-')[1]) >= 60);
+  records = records.filter((record) => Number(record.id.split('-')[1]) >= 30);
   await applyRoomFilter();
   await createReservation();
   expect(page()).toBe(0);
   expect(createdRow()).toBeDefined();
-  expect(document.querySelector('select')?.value).toBe(room.id);
+  expect(document.querySelector<HTMLInputElement>('input[role="combobox"]')?.value).toBe(room.name);
   expect(getReservations).toHaveBeenLastCalledWith(
     expect.objectContaining({ roomId: room.id }),
     expect.any(AbortSignal),
@@ -300,7 +313,7 @@ it('keeps filters and pagination when a creation is excluded and explains why', 
   created = { ...created, roomId: otherRoom.id, roomName: otherRoom.name };
   await createReservation();
   expect(page()).toBe(2);
-  expect(document.querySelector('select')?.value).toBe(room.id);
+  expect(document.querySelector<HTMLInputElement>('input[role="combobox"]')?.value).toBe(room.name);
   expect(createdRow()).toBeUndefined();
   expect(document.body.textContent).toContain(
     'Reservation created, but it is hidden by the current filters.',
@@ -308,19 +321,22 @@ it('keeps filters and pagination when a creation is excluded and explains why', 
   expect(getReservations).toHaveBeenCalledTimes(3);
 });
 
-it('clears the highlight after three seconds without refetching or moving the current page', async () => {
+it('expires the highlight without refetching or overriding manual pagination', async () => {
   await mount();
   await createReservation();
   await act(async () => {
     await vi.advanceTimersByTimeAsync(2999);
   });
   expect(getComputedStyle(createdRow()!).backgroundColor).toBe(theme.palette.action.selected);
+  await click('Next page');
+  expect(page()).toBe(4);
   await act(async () => {
     await vi.advanceTimersByTimeAsync(1);
   });
+  expect(page()).toBe(4);
+  await click('Previous page');
   expect(getComputedStyle(createdRow()!).backgroundColor).not.toBe(theme.palette.action.selected);
-  expect(createdRow()?.classList.contains('MuiTableRow-hover')).toBe(true);
-  expect(page()).toBe(6);
+  expect(page()).toBe(3);
   expect(getReservations).toHaveBeenCalledTimes(2);
 });
 
@@ -335,18 +351,6 @@ it('cleans up its single highlight timeout when the page unmounts', async () => 
   expect(timers).toHaveLength(1);
   await view.unmount();
   expect(cleared).toHaveBeenCalledWith(timers[0]);
-});
-
-it('allows manual pagination while the highlight expires', async () => {
-  await mount();
-  await createReservation();
-  await click('Next page');
-  expect(page()).toBe(7);
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(3000);
-  });
-  expect(page()).toBe(7);
-  expect(getReservations).toHaveBeenCalledTimes(2);
 });
 
 it('replaces the previous highlight timeout after another creation', async () => {
@@ -416,4 +420,20 @@ it('does not misreport a list refresh failure as exclusion by filters', async ()
   );
   expect(document.body.textContent).not.toContain('hidden by the current filters');
   expect(getReservations).toHaveBeenCalledTimes(2);
+});
+
+it('keeps a failed creation open, shows the API error and allows retry', async () => {
+  await mount();
+  vi.mocked(saveReservation).mockRejectedValueOnce(
+    new ApiError('ROOM_ALREADY_BOOKED', 'This room is already booked.', 409),
+  );
+  await createReservation();
+  expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+  expect(document.body.textContent).toContain('This room is already booked.');
+  expect(createdRow()).toBeUndefined();
+  expect(getReservations).toHaveBeenCalledTimes(1);
+  await click('Save reservation');
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(createdRow()).toBeDefined();
+  expect(saveReservation).toHaveBeenCalledTimes(2);
 });

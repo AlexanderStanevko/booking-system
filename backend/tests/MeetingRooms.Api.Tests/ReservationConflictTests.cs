@@ -6,41 +6,40 @@ namespace MeetingRooms.Api.Tests;
 
 public sealed class ReservationConflictTests
 {
-    [Theory]
-    [InlineData(-30, 60)]
-    [InlineData(30, 60)]
-    [InlineData(15, 15)]
-    [InlineData(-30, 120)]
-    public async Task Room_conflicts_detect_partial_contained_and_enclosing_intervals(int offsetMinutes, int durationMinutes)
+    [Fact]
+    public async Task Room_conflicts_detect_partial_contained_and_enclosing_intervals()
     {
         await using var context = new BookingTestContext();
         var existing = await context.AddReservationAsync();
-        var start = existing.StartTime.AddMinutes(offsetMinutes);
-        var request = context.ValidRequest with
+        foreach (var (offsetMinutes, durationMinutes) in new[] { (-30, 60), (30, 60), (15, 15), (-30, 120) })
         {
-            StartTime = start,
-            EndTime = start.AddMinutes(durationMinutes),
-            OrganizerId = context.SecondUser.Id
-        };
-        var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CreateAsync(request));
-        Assert.Equal(ErrorCodes.RoomAlreadyBooked, error.Code);
-        Assert.Equal(StatusCodes.Status409Conflict, error.StatusCode);
+            var start = existing.StartTime.AddMinutes(offsetMinutes);
+            var request = context.ValidRequest with
+            {
+                StartTime = start,
+                EndTime = start.AddMinutes(durationMinutes),
+                OrganizerId = context.SecondUser.Id
+            };
+            var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CreateAsync(request));
+            Assert.Equal(ErrorCodes.RoomAlreadyBooked, error.Code);
+            Assert.Equal(StatusCodes.Status409Conflict, error.StatusCode);
+        }
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task Adjacent_bookings_for_same_room_and_organizer_are_allowed(bool after)
+    [Fact]
+    public async Task Adjacent_bookings_for_same_room_and_organizer_are_allowed()
     {
         await using var context = new BookingTestContext();
         var existing = await context.AddReservationAsync();
-        var start = after ? existing.EndTime : existing.StartTime.AddHours(-1);
-        var result = await context.Reservations.CreateAsync(context.ValidRequest with
+        foreach (var start in new[] { existing.StartTime.AddHours(-1), existing.EndTime })
         {
-            StartTime = start,
-            EndTime = start.AddHours(1)
-        });
-        Assert.Equal(ReservationStatus.Booked, result.Status);
+            var result = await context.Reservations.CreateAsync(context.ValidRequest with
+            {
+                StartTime = start,
+                EndTime = start.AddHours(1)
+            });
+            Assert.Equal(ReservationStatus.Booked, result.Status);
+        }
     }
 
     [Fact]

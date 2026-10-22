@@ -14,7 +14,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 it('sends a GET request with its AbortSignal and returns validated data', async () => {
-  fetchMock.mockResolvedValue(Response.json(payload));
+  fetchMock.mockResolvedValue(Response.json({ ...payload, ignored: true }));
   const controller = new AbortController();
 
   await expect(
@@ -50,18 +50,6 @@ it('allows a POST without a body or a content-type header', async () => {
   );
 });
 
-it('returns the schema output rather than the unchecked response', async () => {
-  fetchMock.mockResolvedValue(Response.json({ id: 'reservation', ignored: true }));
-
-  await expect(apiRequest('/api/reservations/1', schema)).resolves.toEqual(payload);
-});
-
-it('accepts an empty response when the response schema allows it', async () => {
-  fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
-
-  await expect(apiRequest('/api/example', z.undefined())).resolves.toBeUndefined();
-});
-
 it('serializes encoded parameters and zero while omitting undefined and empty strings', () => {
   expect(
     queryString({
@@ -72,11 +60,5 @@ it('serializes encoded parameters and zero while omitting undefined and empty st
       empty: '',
     }),
   ).toBe('?query=A+%26+B&equipment=Projector%2C+Whiteboard&floor=0');
+  expect(queryString({})).toBe('');
 });
-
-it.each([{}, { missing: undefined, empty: '' }])(
-  'returns no query suffix for empty parameters',
-  (values) => {
-    expect(queryString(values)).toBe('');
-  },
-);

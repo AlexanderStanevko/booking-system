@@ -12,13 +12,14 @@ it('clears optional filters and accepts basement floors', () => {
   });
 });
 
-it.each(['0', '-1', '1.5', 'invalid', '1e2', '2147483648'])(
-  'rejects invalid capacity: %s',
-  (minCapacity) => {
-    expect(roomFilterSchema.safeParse({ minCapacity, floor: '' }).success).toBe(false);
-  },
-);
+it('rejects nonpositive, malformed and overflowing capacity filters', () => {
+  for (const minCapacity of ['0', '-1', '1.5', 'invalid', '1e2', '2147483648']) {
+    expect(roomFilterSchema.safeParse({ minCapacity, floor: '' }).success, minCapacity).toBe(false);
+  }
+});
 
-it.each(['1.5', 'invalid', '2147483648', '-2147483649'])('rejects invalid floors: %s', (floor) => {
-  expect(roomFilterSchema.safeParse({ minCapacity: '', floor }).success).toBe(false);
+it('requires a whole floor within the API integer range', () => {
+  for (const floor of ['1.5', 'invalid', '2147483648', '-2147483649']) {
+    expect(roomFilterSchema.safeParse({ minCapacity: '', floor }).success, floor).toBe(false);
+  }
 });

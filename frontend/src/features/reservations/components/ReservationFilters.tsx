@@ -38,6 +38,7 @@ export function ReservationFilters({ rooms, users, onApply }: Props) {
   return (
     <FilterPanel onApply={apply} onReset={reset} error={error}>
       <SelectFilter
+        searchable
         label="Room"
         value={values.roomId}
         onChange={(roomId) => setValues({ ...values, roomId })}
@@ -45,6 +46,7 @@ export function ReservationFilters({ rooms, users, onApply }: Props) {
         options={rooms.map((room) => ({ value: room.id, label: room.name }))}
       />
       <SelectFilter
+        searchable
         label="Organizer"
         value={values.organizerId}
         onChange={(organizerId) => setValues({ ...values, organizerId })}

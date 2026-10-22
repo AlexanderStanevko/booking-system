@@ -16,7 +16,6 @@ export default function RoomsPage() {
     <>
       <PageHeader
         title="Rooms"
-        description="Find the right space for your next meeting."
         onRefresh={() => void rooms.refetch()}
         refreshing={rooms.isFetching}
       />

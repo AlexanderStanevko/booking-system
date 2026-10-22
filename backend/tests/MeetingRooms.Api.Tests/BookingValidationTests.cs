@@ -5,74 +5,67 @@ namespace MeetingRooms.Api.Tests;
 
 public sealed class BookingValidationTests
 {
-    [Theory]
-    [InlineData(-1)]
-    [InlineData(0)]
-    public async Task New_reservations_must_start_strictly_after_now(int minutes)
+    [Fact]
+    public async Task New_reservations_must_start_strictly_after_now()
     {
         await using var context = new BookingTestContext();
-        var start = context.Clock.GetUtcNow().AddMinutes(minutes);
-        var request = context.ValidRequest with { StartTime = start, EndTime = start.AddHours(1) };
-        var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CreateAsync(request));
-        Assert.Equal(ErrorCodes.StartTimeNotInFuture, error.Code);
-    }
-
-    [Theory]
-    [InlineData(-1)]
-    [InlineData(0)]
-    public async Task End_must_be_after_start(int minutes)
-    {
-        await using var context = new BookingTestContext();
-        var request = context.ValidRequest with { EndTime = context.ValidRequest.StartTime.AddMinutes(minutes) };
-        var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CreateAsync(request));
-        Assert.Equal(ErrorCodes.InvalidTimeRange, error.Code);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task Only_active_rooms_can_be_booked(bool active)
-    {
-        await using var context = new BookingTestContext();
-        var request = context.ValidRequest with { RoomId = active ? context.FirstRoom.Id : context.InactiveRoom.Id };
-        if (active)
+        foreach (var minutes in new[] { -1, 0 })
         {
-            Assert.NotNull(await context.Reservations.CreateAsync(request));
-            return;
+            var start = context.Clock.GetUtcNow().AddMinutes(minutes);
+            var request = context.ValidRequest with { StartTime = start, EndTime = start.AddHours(1) };
+            var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CreateAsync(request));
+            Assert.Equal(ErrorCodes.StartTimeNotInFuture, error.Code);
         }
+    }
 
+    [Fact]
+    public async Task End_must_be_after_start()
+    {
+        await using var context = new BookingTestContext();
+        foreach (var minutes in new[] { -1, 0 })
+        {
+            var request = context.ValidRequest with { EndTime = context.ValidRequest.StartTime.AddMinutes(minutes) };
+            var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CreateAsync(request));
+            Assert.Equal(ErrorCodes.InvalidTimeRange, error.Code);
+        }
+    }
+
+    [Fact]
+    public async Task Inactive_rooms_cannot_be_booked()
+    {
+        await using var context = new BookingTestContext();
+        var request = context.ValidRequest with { RoomId = context.InactiveRoom.Id };
         var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CreateAsync(request));
         Assert.Equal(ErrorCodes.RoomInactive, error.Code);
     }
 
     [Fact]
-    public async Task Room_must_exist()
+    public async Task Missing_rooms_and_organizers_return_specific_not_found_errors()
     {
         await using var context = new BookingTestContext();
-        var request = context.ValidRequest with { RoomId = Guid.NewGuid() };
-        var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CreateAsync(request));
-        Assert.Equal(ErrorCodes.RoomNotFound, error.Code);
-        Assert.Equal(StatusCodes.Status404NotFound, error.StatusCode);
+        var room = await Assert.ThrowsAsync<AppException>(() =>
+            context.Reservations.CreateAsync(context.ValidRequest with { RoomId = Guid.NewGuid() }));
+        var organizer = await Assert.ThrowsAsync<AppException>(() =>
+            context.Reservations.CreateAsync(context.ValidRequest with { OrganizerId = Guid.NewGuid() }));
+        Assert.Equal(ErrorCodes.RoomNotFound, room.Code);
+        Assert.Equal(ErrorCodes.UserNotFound, organizer.Code);
+        Assert.Equal(StatusCodes.Status404NotFound, room.StatusCode);
+        Assert.Equal(StatusCodes.Status404NotFound, organizer.StatusCode);
     }
 
     [Fact]
-    public async Task Organizer_must_exist()
+    public async Task Titles_must_be_nonblank_and_within_the_length_limit()
     {
         await using var context = new BookingTestContext();
-        var request = context.ValidRequest with { OrganizerId = Guid.NewGuid() };
-        var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.CreateAsync(request));
-        Assert.Equal(ErrorCodes.UserNotFound, error.Code);
-    }
+        foreach (var title in new[] { "   ", new string('x', 201) })
+        {
+            var error = await Assert.ThrowsAsync<AppException>(() =>
+                context.Reservations.CreateAsync(context.ValidRequest with { Title = title }));
+            Assert.Equal(ErrorCodes.InvalidRequest, error.Code);
+        }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public async Task Empty_titles_are_rejected(string title)
-    {
-        await using var context = new BookingTestContext();
-        var error = await Assert.ThrowsAsync<AppException>(() =>
-            context.Reservations.CreateAsync(context.ValidRequest with { Title = title }));
-        Assert.Equal(ErrorCodes.InvalidRequest, error.Code);
+        var result = await context.Reservations.CreateAsync(context.ValidRequest with { Title = new string('x', 200) });
+        Assert.Equal(200, result.Title.Length);
     }
 
     [Fact]

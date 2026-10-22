@@ -1,10 +1,10 @@
 import { Suspense, useState } from 'react';
-import { Box, Drawer, IconButton, LinearProgress, Link, Stack, Typography } from '@mui/material';
+import { Box, Drawer, IconButton, LinearProgress, Link } from '@mui/material';
 import { Outlet } from 'react-router';
 import { Navigation } from '@/components/layout/Navigation';
 import { AppIcon } from '@/components/common/AppIcon';
+import { LocalTime } from '@/components/common/LocalTime';
 import { layoutTokens } from '@/theme/theme';
-import { localTimeZone } from '@/utils/dates';
 import styles from './DashboardLayout.module.scss';
 
 export function DashboardLayout() {
@@ -49,31 +49,14 @@ export function DashboardLayout() {
           className={styles['dashboard__header']}
           sx={{ bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider' }}
         >
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <IconButton
-              aria-label="Open navigation"
-              onClick={() => setMobileOpen(true)}
-              sx={{ display: { md: 'none' } }}
-            >
-              <AppIcon name="menu" />
-            </IconButton>
-            <Typography variant="body2" color="text.secondary">
-              Office management
-            </Typography>
-          </Stack>
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <AppIcon
-              name="clock"
-              sx={{
-                fontSize: '1rem',
-                color: 'text.secondary',
-                display: { xs: 'none', sm: 'block' },
-              }}
-            />
-            <Typography variant="caption" color="text.secondary">
-              {localTimeZone.replaceAll('_', ' ')}
-            </Typography>
-          </Stack>
+          <IconButton
+            aria-label="Open navigation"
+            onClick={() => setMobileOpen(true)}
+            sx={{ display: { md: 'none' } }}
+          >
+            <AppIcon name="menu" />
+          </IconButton>
+          <LocalTime />
         </Box>
         <Box
           component="main"
@@ -85,14 +68,6 @@ export function DashboardLayout() {
             <Outlet />
           </Suspense>
         </Box>
-        <Typography
-          component="footer"
-          variant="caption"
-          color="text.secondary"
-          sx={{ px: { xs: 2.5, md: 4 }, pb: 3 }}
-        >
-          Meeting Room Reservation System · All meeting times are shown in your local timezone.
-        </Typography>
       </Box>
     </Box>
   );

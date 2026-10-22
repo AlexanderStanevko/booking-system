@@ -68,6 +68,32 @@ export const theme = createTheme({
     },
     MuiTextField: { defaultProps: { size: 'small', fullWidth: true } },
     MuiFormControl: { defaultProps: { size: 'small', fullWidth: true } },
+    MuiAutocomplete: {
+      defaultProps: { size: 'small', fullWidth: true },
+      styleOverrides: {
+        paper: { border: `1px solid ${colors.border}` },
+        option: ({ theme }) => ({
+          ...theme.typography.body2,
+          padding: '8px 12px',
+          minHeight: 48,
+          [theme.breakpoints.up('sm')]: { minHeight: 40 },
+        }),
+      },
+    },
+    MuiMenu: {
+      defaultProps: { slotProps: { paper: { elevation: 1 } } },
+      styleOverrides: { paper: { border: `1px solid ${colors.border}` } },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          ...theme.typography.body2,
+          padding: '8px 12px',
+          minHeight: 48,
+          [theme.breakpoints.up('sm')]: { minHeight: 40 },
+        }),
+      },
+    },
     MuiOutlinedInput: { styleOverrides: { root: { backgroundColor: colors.surface } } },
     MuiTableCell: {
       styleOverrides: {

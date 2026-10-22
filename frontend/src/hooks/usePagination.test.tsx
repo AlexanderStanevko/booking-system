@@ -7,51 +7,36 @@ const records = Array.from({ length: 51 }, (_, index) => index + 1);
 const pageSizeEvent = (size: number) =>
   ({ target: { value: String(size) } }) as ChangeEvent<HTMLInputElement>;
 
-it('starts on page zero with ten records and the filtered total', async () => {
+it('preserves ordering while paging and resets to the first page when changing page size', async () => {
   const view = await renderHook(() => usePagination(records));
   expect(view.current.controls).toMatchObject({ page: 0, rowsPerPage: 10, count: 51 });
   expect(view.current.items).toEqual(records.slice(0, 10));
-});
-
-it('switches pages without changing the source ordering', async () => {
-  const view = await renderHook(() => usePagination(records));
   await act(async () => view.current.controls.onPageChange(null, 1));
   expect(view.current.items).toEqual(records.slice(10, 20));
-  await act(async () => view.current.controls.onPageChange(null, 0));
-  expect(view.current.items).toEqual(records.slice(0, 10));
+  for (const size of [25, 50]) {
+    await act(async () => view.current.controls.onPageChange(null, 1));
+    await act(async () => view.current.controls.onRowsPerPageChange(pageSizeEvent(size)));
+    expect(view.current.controls).toMatchObject({ page: 0, rowsPerPage: size });
+    expect(view.current.items).toEqual(records.slice(0, size));
+  }
 });
 
-it.each([25, 50])('resets the page when the page size changes to %i', async (size) => {
-  const view = await renderHook(() => usePagination(records));
-  await act(async () => view.current.controls.onPageChange(null, 2));
-  await act(async () => view.current.controls.onRowsPerPageChange(pageSizeEvent(size)));
-  expect(view.current.controls).toMatchObject({ page: 0, rowsPerPage: size });
-  expect(view.current.items).toEqual(records.slice(0, size));
-});
-
-it('resets changed filters while preserving the page size', async () => {
+it('keeps a valid page on refresh but resets changed filters while preserving page size', async () => {
   let filterKey = 'Booked';
-  const view = await renderHook(() => usePagination(records, filterKey));
+  let data = records;
+  const view = await renderHook(() => usePagination(data, filterKey));
   await act(async () => view.current.controls.onRowsPerPageChange(pageSizeEvent(25)));
   await act(async () => view.current.controls.onPageChange(null, 1));
+  data = [...records, 52];
   await view.rerender();
-  expect(view.current.controls.page).toBe(1);
+  expect(view.current.controls).toMatchObject({ page: 1, count: 52 });
+  expect(view.current.items).toEqual(records.slice(25, 50));
   filterKey = 'Completed';
   await view.rerender();
   expect(view.current.controls).toMatchObject({ page: 0, rowsPerPage: 25 });
 });
 
-it('keeps a valid page after refreshed data replaces the original array', async () => {
-  let data = records;
-  const view = await renderHook(() => usePagination(data));
-  await act(async () => view.current.controls.onPageChange(null, 1));
-  data = [...records, 52];
-  await view.rerender();
-  expect(view.current.controls).toMatchObject({ page: 1, count: 52 });
-  expect(view.current.items).toEqual(records.slice(10, 20));
-});
-
-it('moves to the last valid page after removal and keeps it if records return', async () => {
+it('clamps removed pages and handles empty results without restoring an obsolete page', async () => {
   let data = records;
   const view = await renderHook(() => usePagination(data));
   await act(async () => view.current.controls.onPageChange(null, 5));
@@ -63,12 +48,6 @@ it('moves to the last valid page after removal and keeps it if records return', 
   data = records;
   await view.rerender();
   expect(view.current.controls.page).toBe(1);
-});
-
-it('handles empty results without a negative page', async () => {
-  let data = records;
-  const view = await renderHook(() => usePagination(data));
-  await act(async () => view.current.controls.onPageChange(null, 3));
   data = [];
   await view.rerender();
   expect(view.current.controls).toMatchObject({ page: 0, count: 0 });

@@ -25,7 +25,7 @@ public sealed class RoomUsageTests
     }
 
     [Fact]
-    public async Task Report_clips_all_durations_to_the_requested_period()
+    public async Task Report_clips_durations_and_excludes_unused_scheduled_time_from_usage()
     {
         await using var context = new BookingTestContext();
         await AddReportDataAsync(context);
@@ -37,15 +37,7 @@ public sealed class RoomUsageTests
         Assert.Equal(1, report.RecordedUsageHours);
         Assert.Equal(1, report.EstimatedUsedHours);
         Assert.Equal(25, report.RecordedUsageRate);
-    }
-
-    [Fact]
-    public async Task Unused_scheduled_remainder_has_no_recorded_usage_hours()
-    {
-        await using var context = new BookingTestContext();
-        await AddReportDataAsync(context);
-        var now = context.Clock.GetUtcNow();
-        var report = (await context.Reports.GetAsync(new() { From = now.AddHours(-2.5), To = now.AddHours(-2) }))
+        report = (await context.Reports.GetAsync(new() { From = now.AddHours(-2.5), To = now.AddHours(-2) }))
             .Single(room => room.RoomId == context.FirstRoom.Id);
         Assert.Equal(1, report.TotalReservations);
         Assert.Equal(0.5, report.TotalBookedHours);

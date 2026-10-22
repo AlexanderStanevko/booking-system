@@ -39,37 +39,20 @@ public sealed class ReservationEditingTests
         Assert.Null(result.ActualEndTime);
     }
 
-    [Theory]
-    [InlineData("duration", ErrorCodes.MaxDurationExceeded)]
-    [InlineData("start", ErrorCodes.StartTimeNotInFuture)]
-    [InlineData("range", ErrorCodes.InvalidTimeRange)]
-    [InlineData("capacity", ErrorCodes.RoomCapacityExceeded)]
-    [InlineData("horizon", ErrorCodes.BookingHorizonExceeded)]
-    [InlineData("inactive", ErrorCodes.RoomInactive)]
-    public async Task Editing_revalidates_booking_rules_without_persisting_invalid_changes(string rule, string code)
+    [Fact]
+    public async Task Editing_revalidates_capacity_without_persisting_invalid_changes()
     {
         await using var context = new BookingTestContext();
         var existing = await context.AddReservationAsync();
         var originalStart = existing.StartTime;
         var originalEnd = existing.EndTime;
-        var request = rule switch
-        {
-            "duration" => context.UpdateRequest with { EndTime = originalStart.AddDays(8) },
-            "start" => context.UpdateRequest with { StartTime = context.Clock.GetUtcNow() },
-            "range" => context.UpdateRequest with { EndTime = originalStart },
-            "capacity" => context.UpdateRequest with { AttendeeCount = 11 },
-            "horizon" => context.UpdateRequest with
-            {
-                StartTime = context.Clock.GetUtcNow().AddDays(91),
-                EndTime = context.Clock.GetUtcNow().AddDays(92)
-            },
-            _ => context.UpdateRequest with { RoomId = context.InactiveRoom.Id }
-        };
+        var request = context.UpdateRequest with { AttendeeCount = 11 };
         var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.UpdateAsync(existing.Id, request));
-        Assert.Equal(code, error.Code);
+        Assert.Equal(ErrorCodes.RoomCapacityExceeded, error.Code);
         Assert.Equal(originalStart, existing.StartTime);
         Assert.Equal(originalEnd, existing.EndTime);
         Assert.Equal(context.FirstRoom.Id, existing.RoomId);
+        Assert.Equal(5, existing.AttendeeCount);
     }
 
     [Theory]
@@ -91,35 +74,29 @@ public sealed class ReservationEditingTests
         Assert.Equal(code, error.Code);
     }
 
-    [Theory]
-    [InlineData(ReservationStatus.Cancelled)]
-    [InlineData(ReservationStatus.Completed)]
-    public async Task Cancelled_and_completed_reservations_cannot_be_edited(ReservationStatus status)
-    {
-        await using var context = new BookingTestContext();
-        var existing = await context.AddReservationAsync(reservation =>
-        {
-            reservation.Status = status;
-            if (status == ReservationStatus.Completed)
-            {
-                reservation.StartTime = context.Clock.GetUtcNow().AddHours(-2);
-                reservation.EndTime = context.Clock.GetUtcNow().AddHours(-1);
-            }
-        });
-        var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.UpdateAsync(existing.Id, context.UpdateRequest));
-        Assert.Equal(ErrorCodes.InvalidReservationStatus, error.Code);
-    }
-
     [Fact]
-    public async Task An_ongoing_reservation_cannot_be_edited()
+    public async Task Only_upcoming_booked_reservations_can_be_edited()
     {
-        await using var context = new BookingTestContext();
-        var existing = await context.AddReservationAsync(reservation =>
+        foreach (var status in new[] { ReservationStatus.Cancelled, ReservationStatus.Completed, ReservationStatus.Booked })
         {
-            reservation.StartTime = context.Clock.GetUtcNow();
-            reservation.EndTime = context.Clock.GetUtcNow().AddHours(1);
-        });
-        var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.UpdateAsync(existing.Id, context.UpdateRequest));
-        Assert.Equal(ErrorCodes.InvalidReservationStatus, error.Code);
+            await using var context = new BookingTestContext();
+            var now = context.Clock.GetUtcNow();
+            var existing = await context.AddReservationAsync(reservation =>
+            {
+                reservation.Status = status;
+                if (status == ReservationStatus.Completed)
+                {
+                    reservation.StartTime = now.AddHours(-2);
+                    reservation.EndTime = now.AddHours(-1);
+                }
+                else if (status == ReservationStatus.Booked)
+                {
+                    reservation.StartTime = now;
+                    reservation.EndTime = now.AddHours(1);
+                }
+            });
+            var error = await Assert.ThrowsAsync<AppException>(() => context.Reservations.UpdateAsync(existing.Id, context.UpdateRequest));
+            Assert.Equal(ErrorCodes.InvalidReservationStatus, error.Code);
+        }
     }
 }

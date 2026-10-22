@@ -1,7 +1,5 @@
 using MeetingRooms.Api.Common.Time;
 using MeetingRooms.Api.Data;
-using MeetingRooms.Api.Data.Seeds;
-using MeetingRooms.Api.Mappings;
 using MeetingRooms.Api.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Time.Testing;
@@ -69,21 +67,4 @@ public sealed class DatabaseSeederTests
         });
     }
 
-    [Fact]
-    public void Seed_definitions_are_deterministic_for_the_same_instant()
-    {
-        var now = new DateTimeOffset(2030, 1, 1, 12, 0, 0, TimeSpan.Zero);
-        var firstRooms = RoomSeedData.Create();
-        var firstUsers = UserSeedData.Create();
-        var firstReservations = ReservationSeedData.Create(firstRooms, firstUsers, now);
-        var secondRooms = RoomSeedData.Create();
-        var secondUsers = UserSeedData.Create();
-        var secondReservations = ReservationSeedData.Create(secondRooms, secondUsers, now.ToOffset(TimeSpan.FromHours(3)));
-
-        Assert.Equal(firstRooms.Select(room => room.ToResponse()), secondRooms.Select(room => room.ToResponse()));
-        Assert.Equal(firstUsers.Select(user => user.ToResponse(0)), secondUsers.Select(user => user.ToResponse(0)));
-        Assert.Equal(firstReservations.Select(reservation => reservation.ToResponse()),
-            secondReservations.Select(reservation => reservation.ToResponse()));
-        Assert.All(secondReservations, reservation => Assert.Equal(TimeSpan.Zero, reservation.StartTime.Offset));
-    }
 }

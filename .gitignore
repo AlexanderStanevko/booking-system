@@ -3,6 +3,7 @@ dist/
 bin/
 obj/
 coverage/
+TestResults/
 *.tsbuildinfo
 *.tmp
 *.temp

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { PageHeader } from '@/components/common/PageHeader';
 import { QueryState } from '@/components/common/QueryState';
 import { TablePanel } from '@/components/common/TablePanel';
@@ -17,20 +17,9 @@ export default function ReportsPage() {
     <>
       <PageHeader
         title="Room usage"
-        description="Understand how scheduled time compares with recorded and estimated usage."
         onRefresh={() => void reports.refetch()}
         refreshing={reports.isFetching}
       />
-      <Alert severity="info" sx={{ mb: 3 }}>
-        <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-          Read these numbers with context
-        </Typography>
-        <Typography variant="body2">
-          Recorded usage comes from meetings explicitly ended early. Estimated usage uses the
-          scheduled duration of automatically completed meetings. Neither measures independently
-          verified physical occupancy.
-        </Typography>
-      </Alert>
       <UsageFilters onApply={setFilters} />
       <QueryState
         pending={reports.isPending}
@@ -39,6 +28,9 @@ export default function ReportsPage() {
         emptyMessage="There are no rooms to report on yet."
         onRetry={() => void reports.refetch()}
       >
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+          Recorded and estimated usage do not independently verify physical room occupancy.
+        </Typography>
         <TablePanel
           title="Usage by room"
           count={reports.data?.length ?? 0}

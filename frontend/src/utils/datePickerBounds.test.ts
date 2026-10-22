@@ -17,10 +17,6 @@ it('disables elapsed minutes and exposes the next available minute', () => {
   expect(disabled('2026-01-15T10:29')).toBe(true);
   expect(disabled('2026-01-15T10:30')).toBe(true);
   expect(disabled('2026-01-15T10:31')).toBe(false);
-});
-
-it('disables elapsed hours but keeps an hour with available minutes', () => {
-  const constraints = dateTimeConstraints(bounds, '');
   for (const [value, expected] of [
     ['2026-01-15T09:00', true],
     ['2026-01-15T10:00', false],
@@ -43,21 +39,13 @@ it('preserves a valid existing timestamp within the current minute', () => {
   const value = toLocalDateTime(original);
   expect(disabled(value, value, original)).toBe(false);
   expect(dateTimeConstraints(bounds, value, original).minDateTime?.second()).toBe(45);
-});
-
-it('allows returning to the valid original minute after editing another minute', () => {
-  const original = '2026-01-15T08:30:45.1234567Z';
   expect(disabled('2026-01-15T10:30', '2026-01-15T10:31', original)).toBe(false);
   expect(dateTimeConstraints(bounds, '2026-01-15T10:31', original).minDateTime?.second()).toBe(45);
-});
-
-it('preserves an existing end later in the same displayed minute as its start', () => {
-  const original = '2026-01-15T08:30:45.1234567Z';
-  const value = toLocalDateTime(original);
-  const constraints = dateTimeConstraints({ after: now }, value, original);
   const date = toPickerDate(value);
   if (!date) throw new Error('A test date is required.');
-  expect(constraints.shouldDisableTime(date, 'minutes')).toBe(false);
+  expect(
+    dateTimeConstraints({ after: now }, value, original).shouldDisableTime(date, 'minutes'),
+  ).toBe(false);
 });
 
 it('keeps historical filter ranges and disables equal or earlier ends', () => {

@@ -6,7 +6,7 @@ namespace MeetingRooms.Api.Tests;
 public sealed class DirectoryServiceTests
 {
     [Fact]
-    public async Task Room_filters_require_all_equipment_and_can_be_combined()
+    public async Task Room_filters_combine_capacity_floor_and_valid_equipment_flags()
     {
         await using var context = new BookingTestContext();
         var result = await context.Rooms.ListAsync(new()
@@ -19,12 +19,6 @@ public sealed class DirectoryServiceTests
         Assert.Empty(await context.Rooms.ListAsync(new() { Equipment = Equipment.Projector | Equipment.TvScreen }));
         Assert.False((await context.Rooms.GetAsync(context.InactiveRoom.Id)).IsActive);
         Assert.Equal(3, (await context.Rooms.ListAsync(new())).Count);
-    }
-
-    [Fact]
-    public async Task Unknown_equipment_flags_are_rejected()
-    {
-        await using var context = new BookingTestContext();
         var error = await Assert.ThrowsAsync<AppException>(() => context.Rooms.ListAsync(new() { Equipment = (Equipment)16 }));
         Assert.Equal(ErrorCodes.InvalidRequest, error.Code);
     }

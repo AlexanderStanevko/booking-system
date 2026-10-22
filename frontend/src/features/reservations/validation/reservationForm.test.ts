@@ -1,49 +1,49 @@
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import { createReservationFormSchema, maximumTitleLength } from './reservationForm';
 import { room, validValues, validationContext } from './reservationForm.fixtures';
 
 const schema = createReservationFormSchema(validationContext);
 
-describe('reservation field validation', () => {
-  it('accepts capacity exactly and transforms the attendee count', () => {
-    expect(schema.parse(validValues).attendeeCount).toBe(room.capacity);
+it('validates attendee counts against the currently selected room', () => {
+  expect(schema.parse(validValues).attendeeCount).toBe(room.capacity);
+  for (const attendeeCount of ['0', '1.5', '5', 'invalid']) {
+    const result = schema.safeParse({ ...validValues, attendeeCount });
+    expect(result.success, attendeeCount).toBe(false);
+    if (!result.success) expect(result.error.issues[0]?.path).toEqual(['attendeeCount']);
+  }
+  const smallerRoom = { ...room, id: 'other-room', capacity: 2 };
+  const changedRoom = createReservationFormSchema({
+    ...validationContext,
+    rooms: [room, smallerRoom],
   });
+  expect(changedRoom.safeParse({ ...validValues, roomId: smallerRoom.id }).success).toBe(false);
+});
 
-  it.each(['', '   ', 'x'.repeat(maximumTitleLength + 1)])('rejects invalid titles', (title) => {
-    expect(schema.safeParse({ ...validValues, title }).success).toBe(false);
-  });
-
-  it.each(['', '0', '-1', '1.5', '5', 'invalid'])(
-    'rejects invalid attendee count: %s',
-    (attendeeCount) => {
-      const result = schema.safeParse({ ...validValues, attendeeCount });
-      expect(result.success).toBe(false);
-      if (!result.success) expect(result.error.issues[0]?.path).toEqual(['attendeeCount']);
-    },
+it('requires a nonblank title within the length limit', () => {
+  expect(schema.safeParse({ ...validValues, title: 'x'.repeat(maximumTitleLength) }).success).toBe(
+    true,
   );
+  for (const title of ['   ', 'x'.repeat(maximumTitleLength + 1)]) {
+    expect(schema.safeParse({ ...validValues, title }).success).toBe(false);
+  }
+});
 
-  it.each(['roomId', 'organizerId'] as const)('requires an existing %s', (field) => {
-    expect(schema.safeParse({ ...validValues, [field]: '' }).success).toBe(false);
-    expect(schema.safeParse({ ...validValues, [field]: 'unknown' }).success).toBe(false);
-  });
+it('requires existing room and organizer IDs', () => {
+  for (const field of ['roomId', 'organizerId'] as const) {
+    for (const value of ['', 'unknown']) {
+      const result = schema.safeParse({ ...validValues, [field]: value });
+      expect(result.success, `${field}: ${value}`).toBe(false);
+      if (!result.success) expect(result.error.issues[0]?.path).toEqual([field]);
+    }
+  }
+});
 
-  it('rejects inactive rooms', () => {
-    const inactiveSchema = createReservationFormSchema({
-      ...validationContext,
-      rooms: [{ ...room, isActive: false }],
-    });
-    const result = inactiveSchema.safeParse(validValues);
-    expect(result.success).toBe(false);
-    if (!result.success) expect(result.error.issues[0]?.path).toEqual(['roomId']);
+it('rejects inactive rooms', () => {
+  const inactiveSchema = createReservationFormSchema({
+    ...validationContext,
+    rooms: [{ ...room, isActive: false }],
   });
-
-  it('revalidates capacity when the selected room changes', () => {
-    const smallerRoom = { ...room, id: 'other-room', capacity: 2 };
-    const updatedSchema = createReservationFormSchema({
-      ...validationContext,
-      rooms: [room, smallerRoom],
-    });
-    expect(updatedSchema.safeParse(validValues).success).toBe(true);
-    expect(updatedSchema.safeParse({ ...validValues, roomId: smallerRoom.id }).success).toBe(false);
-  });
+  const result = inactiveSchema.safeParse(validValues);
+  expect(result.success).toBe(false);
+  if (!result.success) expect(result.error.issues[0]?.path).toEqual(['roomId']);
 });

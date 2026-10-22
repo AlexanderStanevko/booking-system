@@ -35,19 +35,11 @@ export function Navigation({ onNavigate }: { onNavigate?: () => void }) {
         >
           <AppIcon name="rooms" />
         </Box>
-        <Box>
-          <Typography variant="subtitle2">Meeting rooms</Typography>
-          <Typography variant="caption" color="text.secondary">
-            Reservation workspace
-          </Typography>
-        </Box>
+        <Typography variant="subtitle2">Meeting rooms</Typography>
       </Stack>
       <Divider />
       <Box component="nav" aria-label="Main navigation" sx={{ p: 2, flex: 1 }}>
-        <Typography variant="overline" color="text.secondary" sx={{ px: 1.5 }}>
-          Manage workspace
-        </Typography>
-        <List sx={{ pt: 1.5 }}>
+        <List disablePadding>
           {navigation.map(({ path, label, icon }) => (
             <ListItem key={path} disablePadding sx={{ mb: 0.75 }}>
               <ListItemButton
@@ -67,11 +59,6 @@ export function Navigation({ onNavigate }: { onNavigate?: () => void }) {
             </ListItem>
           ))}
         </List>
-      </Box>
-      <Box sx={{ p: 3, borderTop: 1, borderColor: 'divider' }}>
-        <Typography variant="caption" color="text.secondary">
-          A place for focused collaboration.
-        </Typography>
       </Box>
     </>
   );

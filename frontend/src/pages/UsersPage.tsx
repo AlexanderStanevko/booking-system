@@ -12,7 +12,6 @@ export default function UsersPage() {
     <>
       <PageHeader
         title="Users"
-        description="Your colleagues and the meetings they are organizing."
         onRefresh={() => void users.refetch()}
         refreshing={users.isFetching}
       />
@@ -24,7 +23,7 @@ export default function UsersPage() {
         onRetry={() => void users.refetch()}
       >
         <TablePanel
-          title="Workspace directory"
+          title="User directory"
           count={users.data?.length ?? 0}
           refreshing={users.isFetching}
           pagination={pagination.controls}

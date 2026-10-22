@@ -1,4 +1,14 @@
-import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Box,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { formatNumber } from '@/utils/numbers';
 import type { RoomUsage } from '../types/roomUsage';
 
@@ -9,16 +19,37 @@ export function RoomUsageTable({ reports }: { reports: RoomUsage[] }) {
         <TableRow>
           <TableCell>Room</TableCell>
           {[
-            'Total reservations',
-            'Cancelled',
-            'Completed',
-            'Booked hours',
-            'Recorded usage hours',
-            'Estimated used hours',
-            'Recorded usage rate',
-          ].map((heading) => (
-            <TableCell key={heading} align="right">
-              {heading}
+            { label: 'Total reservations' },
+            { label: 'Cancelled' },
+            { label: 'Completed' },
+            { label: 'Booked hours' },
+            {
+              label: 'Recorded usage hours',
+              description: 'Time from the start until a meeting was explicitly ended early.',
+            },
+            {
+              label: 'Estimated used hours',
+              description: 'Scheduled duration of automatically completed meetings.',
+            },
+            {
+              label: 'Recorded usage rate',
+              description: 'Recorded usage hours divided by booked hours, as a percentage.',
+            },
+          ].map(({ label, description }) => (
+            <TableCell key={label} align="right">
+              {description ? (
+                <Tooltip title={description} describeChild>
+                  <Box
+                    component="span"
+                    tabIndex={0}
+                    sx={{ borderBottom: '1px dotted', cursor: 'help' }}
+                  >
+                    {label}
+                  </Box>
+                </Tooltip>
+              ) : (
+                label
+              )}
             </TableCell>
           ))}
         </TableRow>
