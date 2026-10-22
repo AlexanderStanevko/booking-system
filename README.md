@@ -1,8 +1,6 @@
 
 # Meeting Room Reservation System
 
-A web application for booking and managing office meeting rooms.
-
 ## Project Structure
 
 - `frontend/` — React application
@@ -40,15 +38,10 @@ npm run dev
 
 ### Backend
 
-Open a separate terminal:
+Separate terminal:
 
 ```bash
 cd backend
 dotnet restore
 dotnet run
 ```
-
-## Local Development
-
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5000
