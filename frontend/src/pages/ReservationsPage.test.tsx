@@ -430,6 +430,10 @@ it('keeps a failed creation open, shows the API error and allows retry', async (
   await createReservation();
   expect(document.querySelector('[role="dialog"]')).not.toBeNull();
   expect(document.body.textContent).toContain('This room is already booked.');
+  expect(document.querySelectorAll('[role="alert"]')).toHaveLength(1);
+  expect(document.querySelector('[role="alert"]')?.textContent).toContain(
+    'Code: ROOM_ALREADY_BOOKED',
+  );
   expect(createdRow()).toBeUndefined();
   expect(getReservations).toHaveBeenCalledTimes(1);
   await click('Save reservation');

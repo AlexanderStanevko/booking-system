@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Box,
   Chip,
   Stack,
   Table,
@@ -24,7 +25,7 @@ export function RoomTable({ rooms }: { rooms: Room[] }) {
       <TableBody>
         {rooms.map((room) => (
           <TableRow key={room.id} hover>
-            <TableCell>
+            <TableCell sx={{ minWidth: 280 }}>
               <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
                 <Avatar
                   variant="rounded"
@@ -32,7 +33,15 @@ export function RoomTable({ rooms }: { rooms: Room[] }) {
                 >
                   {room.name.slice(0, 1)}
                 </Avatar>
-                <Typography variant="subtitle2">{room.name}</Typography>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="subtitle2">{room.name}</Typography>
+                  <Typography variant="caption" color="text.secondary" component="div">
+                    Room ID:{' '}
+                    <Box component="code" sx={{ overflowWrap: 'anywhere', userSelect: 'all' }}>
+                      {room.id}
+                    </Box>
+                  </Typography>
+                </Box>
               </Stack>
             </TableCell>
             <TableCell sx={{ whiteSpace: 'nowrap' }}>{room.capacity} people</TableCell>

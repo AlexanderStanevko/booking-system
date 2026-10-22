@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Alert, Button, Paper, Skeleton, Stack, Typography } from '@mui/material';
-import { errorMessage } from '@/api/errors';
+import { ApiErrorMessage } from './ApiErrorMessage';
 
 interface Props {
   pending: boolean;
@@ -34,7 +34,7 @@ export function QueryState({ pending, error, empty, emptyMessage, onRetry, child
           </Button>
         }
       >
-        {errorMessage(error)}
+        <ApiErrorMessage error={error} />
       </Alert>
     );
   }

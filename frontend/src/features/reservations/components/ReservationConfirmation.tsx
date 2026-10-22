@@ -7,7 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import { errorMessage } from '@/api/errors';
+import { ApiErrorMessage } from '@/components/common/ApiErrorMessage';
 import { useReservationAction } from '../hooks/useReservationMutations';
 import type { Reservation } from '../types/reservation';
 
@@ -55,7 +55,7 @@ export function ReservationConfirmation({ action, reservation, onClose, onSaved 
         <DialogContentText>{details.description}</DialogContentText>
         {mutation.error && (
           <Alert severity="error" sx={{ mt: 2 }}>
-            {errorMessage(mutation.error)}
+            <ApiErrorMessage error={mutation.error} />
           </Alert>
         )}
       </DialogContent>

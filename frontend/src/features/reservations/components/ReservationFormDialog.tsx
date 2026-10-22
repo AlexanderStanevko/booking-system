@@ -9,7 +9,7 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
-import { errorMessage } from '@/api/errors';
+import { ApiErrorMessage } from '@/components/common/ApiErrorMessage';
 import { AppIcon } from '@/components/common/AppIcon';
 import { localTimeZone } from '@/utils/dates';
 import type { Room } from '@/features/rooms/types/room';
@@ -81,7 +81,7 @@ export function ReservationFormDialog({
           </Typography>
           {mutation.error && (
             <Alert severity="error" sx={{ mb: 3 }}>
-              {errorMessage(mutation.error)}
+              <ApiErrorMessage error={mutation.error} />
             </Alert>
           )}
           <Box
